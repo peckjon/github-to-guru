@@ -3,8 +3,6 @@ const core = require(`@actions/core`);
 const github = require(`@actions/github`);
 
 async function getCollection(auth, id) {
-  console.log(auth);
-  console.log('https://api.getguru.com/api/v1/collections/'+id);
   return axios.get('https://api.getguru.com/api/v1/collections/'+id, {auth: auth})
 }
 
