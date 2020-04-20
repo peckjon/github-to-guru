@@ -29,5 +29,4 @@ jobs:
         GURU_USER_EMAIL:  '${{ secrets.GURU_USER_EMAIL }}'
         GURU_USER_TOKEN:  '${{ secrets.GURU_USER_TOKEN }}'
         GURU_COLLECTION_ID: '********-****-****-****-************'
-
 ```
