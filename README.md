@@ -1,38 +1,28 @@
-# Vulnerability to Azure Board
-Create a Work Item on an Azure Board when a Security Vulnerability is found
+# GitHub to Guru
+Create cards in a Guru collection based on content in a GitHub repo
 
 ## Outputs
 
-### `id`
+### `created`
 
-The id of the Work Item created
+The number of Guru cards created
 
 ## Example usage
 
-1. Ensure that [Automated Security Updates](https://help.github.com/en/github/managing-security-vulnerabilities/configuring-automated-security-updates) are enabled for your repository
+1. Add a Secret named `GURU_USER_TOKEN` containing a [User Token for Guru](https://help.getguru.com/articles/XipkRKLi/Guru-API-Overview)
 
-2. Add a Secret named `PERSONAL_TOKEN` containing a [GitHub Personal Access Token](https://github.com/settings/tokens) with the "repo" scope
-
-3. Add a Secret named `AZURE_PERSONAL_ACCESS_TOKEN` containing an [Azure Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) with "read & write" permission for Work Items
-
-4. Add a workflow file which responds to Pull Requests, customizing the ORG_URL and PROJECT_NAME properties:
+2. Add a workflow file which responds to file changes:
 
 ```yaml
-name: Check for vulnerabilities
+name: Create guru cards
 
-'on':
-  pull_request:
-    branches:
-      - master
+on: [push]
 
 jobs:
-  alert:
+  guru:
     runs-on: ubuntu-latest
     steps:
-    - uses: peckjon/vulnerability-to-azure-board@master
+    - uses: peckjon/github-to-guru@master
       env:
-        GITHUB_TOKEN: '${{ secrets.PERSONAL_TOKEN }}'
-        AZURE_PERSONAL_ACCESS_TOKEN: '${{ secrets.AZURE_PERSONAL_ACCESS_TOKEN }}'
-        ORG_URL: 'https://dev.azure.com/your_org_name'
-        PROJECT_NAME: 'your_project_name'
+        GURU_USER_TOKEN: '********'
 ```
