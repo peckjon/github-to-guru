@@ -13,7 +13,7 @@ Number of Guru cards created
 
 2. Add a Secret named `GURU_USER_EMAIL` containing the email address for which you [created the User Token](https://app.getguru.com/settings/api-access)
 
-3. Add a workflow file which responds to file changes:
+3. Add a workflow file which responds to file changes, customizing GURU_COLLECTION_ID to the `id` of a collection found at https://api.getguru.com/api/v1/collections:
 
 ```yaml
 name: Create guru cards
@@ -28,4 +28,6 @@ jobs:
       env:
         GURU_USER_EMAIL:  '${{ secrets.GURU_USER_EMAIL }}'
         GURU_USER_TOKEN:  '${{ secrets.GURU_USER_TOKEN }}'
+        GURU_COLLECTION_ID: '********-****-****-****-************'
+
 ```
