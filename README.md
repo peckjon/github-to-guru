@@ -11,7 +11,9 @@ Number of Guru cards created
 
 1. Add a Secret named `GURU_USER_TOKEN` containing a [User Token for Guru](https://help.getguru.com/articles/XipkRKLi/Guru-API-Overview)
 
-2. Add a workflow file which responds to file changes:
+2. Add a Secret named `GURU_USER_EMAIL` containing the email address for which you [created the User Token](https://app.getguru.com/settings/api-access)
+
+3. Add a workflow file which responds to file changes:
 
 ```yaml
 name: Create guru cards
