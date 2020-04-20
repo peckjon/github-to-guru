@@ -1,0 +1,24 @@
+{
+  "name": "github-to-guru",
+  "version": "0.1.0",
+  "description": "Create cards in a Guru collection based on content in a GitHub repo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peckjon/github-to-guru.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/peckjon/github-to-guru/issues"
+  },
+  "homepage": "https://github.com/peckjon/github-to-guru#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.3",
+    "@actions/github": "^2.1.1"
+  }
+}
