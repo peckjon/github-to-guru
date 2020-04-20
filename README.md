@@ -24,5 +24,6 @@ jobs:
     steps:
     - uses: peckjon/github-to-guru@master
       env:
+        GURU_USER_EMAIL:  '${{ secrets.GURU_USER_EMAIL }}'
         GURU_USER_TOKEN:  '${{ secrets.GURU_USER_TOKEN }}'
 ```
