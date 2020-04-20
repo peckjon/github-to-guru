@@ -5,7 +5,7 @@ Create cards in a Guru collection based on content in a GitHub repo
 
 ### `created`
 
-The number of Guru cards created
+Number of Guru cards created
 
 ## Example usage
 
