@@ -24,6 +24,7 @@ jobs:
   guru:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v1
     - uses: peckjon/github-to-guru@master
       env:
         GURU_USER_EMAIL:  '${{ secrets.GURU_USER_EMAIL }}'
