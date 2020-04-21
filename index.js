@@ -58,7 +58,7 @@ try {
           console.log(`  slug: ${response.data.slug}`);
           core.setOutput(`created`, `${nCreated}`);
         }).catch(error => {
-          core.setFailed(`Unable to create card: ${error.message}`);
+          core.setFailed(`Unable to create card for ${filename}: ${error.message}`);
         });
       } catch (error) {
         core.setFailed(`Unable to prepare card: ${error.message}`);
