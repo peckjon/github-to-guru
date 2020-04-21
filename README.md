@@ -18,7 +18,10 @@ Number of Guru cards created
 ```yaml
 name: Create guru cards
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   guru:
