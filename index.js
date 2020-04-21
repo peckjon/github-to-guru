@@ -1,4 +1,5 @@
 const axios = require(`axios`);
+const fs = require('fs');
 const core = require(`@actions/core`);
 const github = require(`@actions/github`);
 
@@ -42,19 +43,26 @@ try {
     if(response.data.collectionType==`EXTERNAL`) {
       core.setFailed(`Workflow for Synched Collections has not yet been implemented`);
     } else {
-      createCard(
-        auth,
-        process.env.GURU_COLLECTION_ID,
-        `Test from GitHub-to-Guru action`,
-        `This is a test post from [GitHub to Guru](https://github.com/peckjon/github-to-guru)`
-      ).then(response => {
-        nCreated += 1;
-        console.log(`  id: ${response.data.id}`);
-        console.log(`  slug: ${response.data.slug}`);
-        core.setOutput(`created`, `${nCreated}`);
-      }).catch(error => {
-        core.setFailed(`Unable to get collection info: ${error.message}`);
-      });
+      console.log(process.env.FILE_LIST)
+      let files = JSON.parse(process.env.FILE_LIST);
+      for (let filename in files) try {
+        console.log(files[filename]);
+        createCard(
+          auth,
+          process.env.GURU_COLLECTION_ID,
+          files[filename],
+          fs.readFileSync(filename, "utf8")
+        ).then(response => {
+          nCreated += 1;
+          console.log(`  id: ${response.data.id}`);
+          console.log(`  slug: ${response.data.slug}`);
+          core.setOutput(`created`, `${nCreated}`);
+        }).catch(error => {
+          core.setFailed(`Unable to create card: ${error.message}`);
+        });
+      } catch (error) {
+        core.setFailed(`Unable to prepare card: ${error.message}`);
+      }
     }
   }).catch(error => {
     core.setFailed(`Unable to get collection info: ${error.message}`);
