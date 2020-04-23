@@ -1,11 +1,21 @@
 const axios = require(`axios`);
-const fs = require('fs');
+const cpfile = require(`cp-file`);
+const child_process = require(`child_process`);
+const fs = require(`fs`);
+const tmp = require(`tmp`);
+const write = require(`write`);
 const core = require(`@actions/core`);
+const exec = require('@actions/exec');
 const github = require(`@actions/github`);
 
 async function getCollection(auth, collectionId) {
   console.log(`collection: ${collectionId}`)
   return axios.get(`https://api.getguru.com/api/v1/collections/`+collectionId, {auth: auth})
+}
+
+async function syncCollection(tmpdirname, auth, collectionId) {
+  await exec.exec(`zip -r -j guru_collection.zip ${tmpdirname}`);
+  await exec.exec(`curl -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@guru_collection.zip" -D -`);
 }
 
 async function createCard(auth, collectionId, title, content) {
@@ -41,7 +51,29 @@ try {
     console.log(`cards:`, response.data.cards);
     console.log(`publicCards:`, response.data.publicCards);
     if(response.data.collectionType==`EXTERNAL`) {
-      core.setFailed(`Workflow for Synched Collections has not yet been implemented`);
+      console.log(process.env.FILE_LIST)
+      let files = JSON.parse(process.env.FILE_LIST);
+      var tmpdir = tmp.dirSync();
+      console.log('Dir: ', tmpdir.name);
+      for (let filename in files) try {
+        console.log(files[filename]);
+        let tmpfilename=filename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
+        cpfile.sync(filename,`${tmpdir.name}/${tmpfilename}.md`);
+        var yaml=`Title: ${files[filename]}
+ExternalId: ${process.env.GITHUB_REPOSITORY}/${filename}.md
+ExternalUrl: ${process.env.GITHUB_REPOSITORY}/${filename}.md
+`
+        write.sync(`${tmpdir.name}/${tmpfilename}.yaml`, yaml); 
+        console.log(`  id: ${response.data.id}`);
+        console.log(`  slug: ${response.data.slug}`);
+        nCreated += 1;
+        core.setOutput(`created`, `${nCreated}`);
+      } catch (error) {
+        core.setFailed(`Unable to prepare tempfiles: ${error.message}`);
+      }
+      syncCollection(tmpdir.name,auth,process.env.GURU_COLLECTION_ID).catch(error => {
+        core.setFailed(`Unable to sync collection: ${error.message}`);
+      });
     } else {
       console.log(process.env.FILE_LIST)
       let files = JSON.parse(process.env.FILE_LIST);
@@ -53,9 +85,9 @@ try {
           files[filename],
           fs.readFileSync(filename, "utf8")
         ).then(response => {
-          nCreated += 1;
           console.log(`  id: ${response.data.id}`);
           console.log(`  slug: ${response.data.slug}`);
+          nCreated += 1;
           core.setOutput(`created`, `${nCreated}`);
         }).catch(error => {
           core.setFailed(`Unable to create card for ${filename}: ${error.message}`);
