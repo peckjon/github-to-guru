@@ -63,6 +63,7 @@ try {
 ExternalId: ${process.env.GITHUB_REPOSITORY}/${filename}
 ExternalUrl: https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}
 `
+        console.log(yaml);
         write.sync(`${tmpdir.name}/${tmpfilename}.yaml`, yaml); 
         console.log(`  id: ${response.data.id}`);
         console.log(`  slug: ${response.data.slug}`);
