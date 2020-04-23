@@ -60,8 +60,8 @@ try {
         let tmpfilename=filename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
         cpfile.sync(filename,`${tmpdir.name}/${tmpfilename}.md`);
         var yaml=`Title: ${files[filename]}
-ExternalId: ${process.env.GITHUB_REPOSITORY}/${filename}.md
-ExternalUrl: ${process.env.GITHUB_REPOSITORY}/${filename}.md
+ExternalId: ${process.env.GITHUB_REPOSITORY}/${filename}
+ExternalUrl: https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}
 `
         write.sync(`${tmpdir.name}/${tmpfilename}.yaml`, yaml); 
         console.log(`  id: ${response.data.id}`);
