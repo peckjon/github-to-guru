@@ -50,12 +50,32 @@ SomePath/SomeOtherFile.md:
 - `GURU_BOARD_DIR`: the path, in your repo, to a directory containing the YAML and markdown files for your boards ([documentation](https://developer.getguru.com/docs/guru-sync-manual-api#boards))
 - `GURU_BOARD_YAML`: path to a single .yml file containing the details for all boards. It should contain one entry for each board, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#boards)) for that individual board, as follows:
 ```
-(EXAMPLE TBD)
+Board1:
+  Title: Board Title
+  Description: |
+    Multi line
+    Description
+  Items:
+  - ID: "card1"
+    Type: "card"
+  - Type: "section"
+    Title: "My Section"
+    Items:
+    - ID: "card2"
+      Type: "card"
 ```
 - `GURU_BOARDGROUP_DIR`: the path, in your repo, to a directory containing the YAML and markdown files for your board groups ([documentation](https://developer.getguru.com/docs/guru-sync-manual-api#board-groups))
 - `GURU_BOARDGROUP_YAML`: path to a single .yml file containing the details for all board groups. It should contain one entry for each board group, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#board-groups)) for that individual board group, as follows:
 ```
-(EXAMPLE TBD)
+BoardGroup1:
+  Title: Board Group Title
+  Description: |
+    Multi line
+    Description
+  Boards:
+  - board1
+  - board2
+  - board3
 ```
 
 **Notes:** 
