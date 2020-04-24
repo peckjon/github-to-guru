@@ -16,16 +16,16 @@ Number of Guru cards created
 3. Add a YAML file to your repo containing one entry for each markdown file you wish to add, specifying the card properties:
 
 ```
-SomeFile.md:
-  Title: This is Some Thing
+--- 
+SomeFile.md: 
   Tags: 
-      - Subject One
-      - Subject Two
-
-SomePath/SomeOtherFile.md:
-  Title: This is Some Other Thing
+    - "Subject One"
+    - "Subject Two"
+  Title: "This is Some Thing"
+SomePath/SomeOtherFile.md: 
   Tags: 
-      - Subject One
+    - "Subject One"
+  Title: "This is Some Other Thing"
 ```
 
 3. Add a workflow file which responds to file changes, setting GURU_COLLECTION_ID to the `id` of a collection found at https://api.getguru.com/api/v1/collections, and setting `GURU_CARD_YAML` as the name of the YAML file you created in the prior step.

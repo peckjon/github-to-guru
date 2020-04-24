@@ -8,14 +8,20 @@ const core = require(`@actions/core`);
 const exec = require('@actions/exec');
 const github = require(`@actions/github`);
 
+async function makeDir(path) {
+  await fs.mkdir(path);
+}
+
 async function getCollection(auth, collectionId) {
   console.log(`collection: ${collectionId}`)
   return axios.get(`https://api.getguru.com/api/v1/collections/`+collectionId, {auth: auth})
 }
 
 async function syncCollection(tmpdirname, auth, collectionId) {
-  await exec.exec(`zip -r -j guru_collection.zip ${tmpdirname}`);
-  await exec.exec(`curl -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@guru_collection.zip" -D -`);
+  let options = {};
+  options.cwd=tmpdirname;
+  await exec.exec(`zip`, [`-r`,`guru_collection.zip`,`./`], options);
+  await exec.exec(`curl -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@${tmpdirname}/guru_collection.zip" -D -`);
 }
 
 async function createCard(auth, collectionId, title, content) {
@@ -56,19 +62,21 @@ try {
     if(response.data.collectionType==`EXTERNAL`) {
       var tmpdir = tmp.dirSync();
       console.log('Dir: ', tmpdir.name);
-      var collectionYaml=`---
+      var collectionYaml=`--- ~
 `
-      write.sync(`${tmpdir.name}/collection.yaml`, collectionYaml); 
+      write.sync(`${tmpdir.name}/collection.yaml`, collectionYaml);
+      makeDir(`${tmpdir.name}/cards`);
       for (let filename in files) try {
         console.log(files[filename].Title);
         let tmpfilename=filename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
-        cpfile.sync(filename,`${tmpdir.name}/${tmpfilename}.md`);
-        var cardYaml=`Title: ${files[filename].Title}
-ExternalId: ${process.env.GITHUB_REPOSITORY}/${filename}
-ExternalUrl: https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}
+        cpfile.sync(filename,`${tmpdir.name}/cards/${tmpfilename}.md`);
+        var cardYaml=`---
+Title: "${files[filename].Title}"
+ExternalId: "${process.env.GITHUB_REPOSITORY}/${filename}"
+ExternalUrl: "https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}"
 `
         console.log(cardYaml);
-        write.sync(`${tmpdir.name}/${tmpfilename}.yaml`, cardYaml); 
+        write.sync(`${tmpdir.name}/cards/${tmpfilename}.yaml`, cardYaml); 
         console.log(`  id: ${response.data.id}`);
         console.log(`  slug: ${response.data.slug}`);
         nCreated += 1;
