@@ -56,16 +56,19 @@ try {
     if(response.data.collectionType==`EXTERNAL`) {
       var tmpdir = tmp.dirSync();
       console.log('Dir: ', tmpdir.name);
+      var collectionYaml=`---
+`
+      write.sync(`${tmpdir.name}/collection.yaml`, collectionYaml); 
       for (let filename in files) try {
         console.log(files[filename].Title);
         let tmpfilename=filename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
         cpfile.sync(filename,`${tmpdir.name}/${tmpfilename}.md`);
-        var yml=`Title: ${files[filename].Title}
+        var cardYaml=`Title: ${files[filename].Title}
 ExternalId: ${process.env.GITHUB_REPOSITORY}/${filename}
 ExternalUrl: https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}
 `
-        console.log(yml);
-        write.sync(`${tmpdir.name}/${tmpfilename}.yaml`, yml); 
+        console.log(cardYaml);
+        write.sync(`${tmpdir.name}/${tmpfilename}.yaml`, cardYaml); 
         console.log(`  id: ${response.data.id}`);
         console.log(`  slug: ${response.data.slug}`);
         nCreated += 1;
