@@ -60,6 +60,7 @@ try {
       if (process.env.GURU_COLLECTION_YAML) {
         cpfile.sync(process.env.GURU_COLLECTION_YAML,`${tmpdir.name}/collection.yaml`);
       } else {
+        console.log(fs.readFileSync(tmpdir.name, "utf8"));
         fs.writeFileSync(`${tmpdir.name}/collection.yaml`, `--- ~\n`);
       }
       fs.mkdirSync(`${tmpdir.name}/cards`);
