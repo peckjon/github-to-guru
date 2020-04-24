@@ -35,7 +35,7 @@ Then, add one or more of the following to the `env`:
 
 - `GURU_COLLECTION_YAML`: path to a file in your repo containing the YAML describing your collection, as specified in the ([Guru Manual Sync documentation](https://developer.getguru.com/docs/guru-sync-manual-api#root-directory))
 - `GURU_CARD_DIR`: the path, in your repo, to a directory containing the YAML and markdown files for your cards ([documentation](https://developer.getguru.com/docs/guru-sync-manual-api#cards))
-- `GURU_CARD_YAML`: path to a single .yml file containing the details for all cards. It should contain one entry -- the path to a markdown file in your repo -- for each card you wish to add, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#cards)) for that individual card, as follows:
+- `GURU_CARD_YAML`: path to a single .yml file containing the details for all cards. It should contain one entry (the path to a markdown file in your repo) for each card you wish to add, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#cards)) for that individual card, as follows:
 ```
 SomeFile.md: 
   Tags: 
@@ -72,7 +72,7 @@ BoardGroup1:
   Description: My first board group
   Boards:
   - board1
-BoardGroup1:
+BoardGroup2:
   Title: Board Group One
   Description: |
     Multi line
