@@ -1,9 +1,9 @@
 const axios = require(`axios`);
 const cpfile = require(`cp-file`);
-const child_process = require(`child_process`);
 const fs = require(`fs`);
 const tmp = require(`tmp`);
 const write = require(`write`);
+const yaml = require('yaml')
 const core = require(`@actions/core`);
 const exec = require('@actions/exec');
 const github = require(`@actions/github`);
@@ -50,21 +50,22 @@ try {
     console.log(`slug:`, response.data.slug);
     console.log(`cards:`, response.data.cards);
     console.log(`publicCards:`, response.data.publicCards);
+    let configFile = fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8');
+    let files = yaml.parse(configFile);
+    console.log(files)
     if(response.data.collectionType==`EXTERNAL`) {
-      console.log(process.env.FILE_LIST)
-      let files = JSON.parse(process.env.FILE_LIST);
       var tmpdir = tmp.dirSync();
       console.log('Dir: ', tmpdir.name);
       for (let filename in files) try {
-        console.log(files[filename]);
+        console.log(files[filename].Title);
         let tmpfilename=filename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
         cpfile.sync(filename,`${tmpdir.name}/${tmpfilename}.md`);
-        var yaml=`Title: ${files[filename]}
+        var yml=`Title: ${files[filename].Title}
 ExternalId: ${process.env.GITHUB_REPOSITORY}/${filename}
 ExternalUrl: https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}
 `
-        console.log(yaml);
-        write.sync(`${tmpdir.name}/${tmpfilename}.yaml`, yaml); 
+        console.log(yml);
+        write.sync(`${tmpdir.name}/${tmpfilename}.yaml`, yml); 
         console.log(`  id: ${response.data.id}`);
         console.log(`  slug: ${response.data.slug}`);
         nCreated += 1;
@@ -76,14 +77,12 @@ ExternalUrl: https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${f
         core.setFailed(`Unable to sync collection: ${error.message}`);
       });
     } else {
-      console.log(process.env.FILE_LIST)
-      let files = JSON.parse(process.env.FILE_LIST);
       for (let filename in files) try {
-        console.log(files[filename]);
+        console.log(files[filename].Title);
         createCard(
           auth,
           process.env.GURU_COLLECTION_ID,
-          files[filename],
+          files[filename].Title,
           fs.readFileSync(filename, "utf8")
         ).then(response => {
           console.log(`  id: ${response.data.id}`);

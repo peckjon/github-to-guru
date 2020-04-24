@@ -13,7 +13,22 @@ Number of Guru cards created
 
 2. Add a Secret named `GURU_USER_EMAIL` containing the email address for which you [created the User Token](https://app.getguru.com/settings/api-access)
 
-3. Add a workflow file which responds to file changes, customizing GURU_COLLECTION_ID to the `id` of a collection found at https://api.getguru.com/api/v1/collections. Also update `FILE_LIST` in the env: it should be a JSON object in which each key is a markdown file in your repo, and each value is the title for the Guru card it creates.
+3. Add a YAML file to your repo containing one entry for each markdown file you wish to add, specifying the card properties:
+
+```
+SomeFile.md:
+  Title: This is Some Thing
+  Tags: 
+      - Subject One
+      - Subject Two
+
+SomePath/SomeOtherFile.md:
+  Title: This is Some Other Thing
+  Tags: 
+      - Subject One
+```
+
+3. Add a workflow file which responds to file changes, setting GURU_COLLECTION_ID to the `id` of a collection found at https://api.getguru.com/api/v1/collections, and setting `GURU_CARD_YAML` as the name of the YAML file you created in the prior step.
 
 ```yaml
 name: Create guru cards
@@ -33,9 +48,5 @@ jobs:
         GURU_USER_EMAIL:  '${{ secrets.GURU_USER_EMAIL }}'
         GURU_USER_TOKEN:  '${{ secrets.GURU_USER_TOKEN }}'
         GURU_COLLECTION_ID: '********-****-****-****-************'
-        FILE_LIST: |
-          {
-            "something.md": "Title for the Something Card",
-            "some_other_thing.md": "Title for the Other Thing Card"
-          }
+        GURU_CARD_YAML: 'config.yaml'
 ```
