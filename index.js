@@ -8,10 +8,6 @@ const core = require(`@actions/core`);
 const exec = require('@actions/exec');
 const github = require(`@actions/github`);
 
-async function makeDir(path) {
-  await fs.mkdir(path);
-}
-
 async function getCollection(auth, collectionId) {
   console.log(`collection: ${collectionId}`)
   return axios.get(`https://api.getguru.com/api/v1/collections/`+collectionId, {auth: auth})
@@ -46,8 +42,6 @@ try {
     username: process.env.GURU_USER_EMAIL,
     password: process.env.GURU_USER_TOKEN
   };
-  let nCreated = 0;
-  core.setOutput(`created`, `${nCreated}`);
   getCollection(
     auth,
     process.env.GURU_COLLECTION_ID
@@ -57,15 +51,21 @@ try {
     console.log(`cards:`, response.data.cards);
     console.log(`publicCards:`, response.data.publicCards);
     let configFile = fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8');
+    //TBD: if (process.env.GURU_CARD_YAML) vs GURU_CARD_DIR
+    if(process.env.GURU_CARD_DIR) {
+      core.setFailed("Hold tight! GURU_CARD_DIR support is being added within 48h");
+    }
     let files = yaml.parse(configFile);
     console.log(files)
     if(response.data.collectionType==`EXTERNAL`) {
       var tmpdir = tmp.dirSync();
-      console.log('Dir: ', tmpdir.name);
-      var collectionYaml=`--- ~
-`
-      write.sync(`${tmpdir.name}/collection.yaml`, collectionYaml);
-      makeDir(`${tmpdir.name}/cards`);
+      console.log('TmpDir: ', tmpdir.name);
+      if (process.env.GURU_COLLECTION_YAML) {
+        cpfile.sync(process.env.GURU_COLLECTION_YAML,`${tmpdir.name}/collection.yaml`);
+      } else {
+        write.sync(`${tmpdir.name}/collection.yaml`, ``);
+      }
+      fs.mkdirSync(`${tmpdir.name}/cards`);
       for (let filename in files) try {
         console.log(files[filename].Title);
         let tmpfilename=filename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
@@ -79,8 +79,6 @@ ExternalUrl: "https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${
         write.sync(`${tmpdir.name}/cards/${tmpfilename}.yaml`, cardYaml); 
         console.log(`  id: ${response.data.id}`);
         console.log(`  slug: ${response.data.slug}`);
-        nCreated += 1;
-        core.setOutput(`created`, `${nCreated}`);
       } catch (error) {
         core.setFailed(`Unable to prepare tempfiles: ${error.message}`);
       }
@@ -98,8 +96,6 @@ ExternalUrl: "https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${
         ).then(response => {
           console.log(`  id: ${response.data.id}`);
           console.log(`  slug: ${response.data.slug}`);
-          nCreated += 1;
-          core.setOutput(`created`, `${nCreated}`);
         }).catch(error => {
           core.setFailed(`Unable to create card for ${filename}: ${error.message}`);
         });
