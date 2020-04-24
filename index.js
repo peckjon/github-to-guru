@@ -2,7 +2,6 @@ const axios = require(`axios`);
 const cpfile = require(`cp-file`);
 const fs = require(`fs`);
 const tmp = require(`tmp`);
-const write = require(`write`);
 const yaml = require('yaml')
 const core = require(`@actions/core`);
 const exec = require('@actions/exec');
@@ -46,10 +45,8 @@ try {
     auth,
     process.env.GURU_COLLECTION_ID
   ).then(response => {
-    console.log(`collectionType:`, response.data.collectionType);
-    console.log(`slug:`, response.data.slug);
-    console.log(`cards:`, response.data.cards);
-    console.log(`publicCards:`, response.data.publicCards);
+    console.log(`Found ${response.data.collectionType} collection at https://app.getguru.com/card/${response.data.slug}`);
+    console.log(`${response.data.cards} cards, ${response.data.publicCards} publc`);
     let configFile = fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8');
     //TBD: if (process.env.GURU_CARD_YAML) vs GURU_CARD_DIR
     if(process.env.GURU_CARD_DIR) {
@@ -63,7 +60,7 @@ try {
       if (process.env.GURU_COLLECTION_YAML) {
         cpfile.sync(process.env.GURU_COLLECTION_YAML,`${tmpdir.name}/collection.yaml`);
       } else {
-        write.sync(`${tmpdir.name}/collection.yaml`, ``);
+        fs.writeFileSync(`${tmpdir.name}/collection.yaml`, `--- ~\n`);
       }
       fs.mkdirSync(`${tmpdir.name}/cards`);
       for (let filename in files) try {
@@ -76,9 +73,7 @@ ExternalId: "${process.env.GITHUB_REPOSITORY}/${filename}"
 ExternalUrl: "https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}"
 `
         console.log(cardYaml);
-        write.sync(`${tmpdir.name}/cards/${tmpfilename}.yaml`, cardYaml); 
-        console.log(`  id: ${response.data.id}`);
-        console.log(`  slug: ${response.data.slug}`);
+        fs.writeFileSync(`${tmpdir.name}/cards/${tmpfilename}.yaml`, cardYaml);
       } catch (error) {
         core.setFailed(`Unable to prepare tempfiles: ${error.message}`);
       }
@@ -94,8 +89,7 @@ ExternalUrl: "https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${
           files[filename].Title,
           fs.readFileSync(filename, "utf8")
         ).then(response => {
-          console.log(`  id: ${response.data.id}`);
-          console.log(`  slug: ${response.data.slug}`);
+          console.log(`Created card for ${filename}`);
         }).catch(error => {
           core.setFailed(`Unable to create card for ${filename}: ${error.message}`);
         });
