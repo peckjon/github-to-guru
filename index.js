@@ -47,13 +47,13 @@ try {
   ).then(response => {
     console.log(`Found ${response.data.collectionType} collection at https://app.getguru.com/collections/${response.data.slug}`);
     console.log(`${response.data.cards} cards, ${response.data.publicCards} publc`);
-    let configFile = fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8');
+    let cardConfig = fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8');
     //TBD: if (process.env.GURU_CARD_YAML) vs GURU_CARD_DIR
     if(process.env.GURU_CARD_DIR) {
       core.setFailed("Hold tight! GURU_CARD_DIR support is being added within 48h");
     }
-    let files = yaml.parse(configFile);
-    console.log(files)
+    let cards = yaml.parse(cardConfig);
+    console.log(cards)
     if(response.data.collectionType==`EXTERNAL`) {
       var tmpdir = tmp.dirSync();
       console.log('TmpDir: ', tmpdir.name);
@@ -63,12 +63,12 @@ try {
         fs.writeFileSync(`${tmpdir.name}/collection.yaml`, `--- ~\n`);
       }
       fs.mkdirSync(`${tmpdir.name}/cards`);
-      for (let filename in files) try {
-        console.log(files[filename].Title);
+      for (let filename in cards) try {
+        console.log(cards[filename].Title);
         let tmpfilename=filename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
         cpfile.sync(filename,`${tmpdir.name}/cards/${tmpfilename}.md`);
         var cardYaml=`---
-Title: "${files[filename].Title}"
+Title: "${cards[filename].Title}"
 ExternalId: "${process.env.GITHUB_REPOSITORY}/${filename}"
 ExternalUrl: "https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}"
 `
@@ -81,12 +81,12 @@ ExternalUrl: "https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${
         core.setFailed(`Unable to sync collection: ${error.message}`);
       });
     } else {
-      for (let filename in files) try {
-        console.log(files[filename].Title);
+      for (let filename in cards) try {
+        console.log(cards[filename].Title);
         createCard(
           auth,
           process.env.GURU_COLLECTION_ID,
-          files[filename].Title,
+          cards[filename].Title,
           fs.readFileSync(filename, "utf8")
         ).then(response => {
           console.log(`Created card for ${filename}`);
