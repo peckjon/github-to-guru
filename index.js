@@ -45,7 +45,7 @@ try {
     auth,
     process.env.GURU_COLLECTION_ID
   ).then(response => {
-    console.log(`Found ${response.data.collectionType} collection at https://app.getguru.com/card/${response.data.slug}`);
+    console.log(`Found ${response.data.collectionType} collection at https://app.getguru.com/collections/${response.data.slug}`);
     console.log(`${response.data.cards} cards, ${response.data.publicCards} publc`);
     let configFile = fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8');
     //TBD: if (process.env.GURU_CARD_YAML) vs GURU_CARD_DIR
