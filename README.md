@@ -35,7 +35,7 @@ Then, add one or more of the following to the `env`:
 
 - `GURU_COLLECTION_YAML`: path to a file in your repo containing the YAML describing your collection, as specified in the ([Guru Manual Sync documentation](https://developer.getguru.com/docs/guru-sync-manual-api#root-directory))
 - `GURU_CARD_DIR`: the path, in your repo, to a directory containing the YAML and markdown files for your cards ([documentation](https://developer.getguru.com/docs/guru-sync-manual-api#cards))
-- `GURU_CARD_YAML`: path to a single .yml file containing the details for all cards. It should contain one entry (the path to a markdown file in your repo) for each card you wish to add, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#cards)) for that individual card, as follows:
+- `GURU_CARD_YAML`: path to a single .yaml file containing the details for all cards. It should contain one entry (the path to a markdown file in your repo) for each card you wish to add, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#cards)) for that individual card, as follows:
 ```
 SomeFile.md: 
   Tags: 
@@ -48,7 +48,7 @@ SomePath/SomeOtherFile.md:
   Title: "This is Some Other Thing"
 ```
 - `GURU_BOARD_DIR`: the path, in your repo, to a directory containing the YAML and markdown files for your boards ([documentation](https://developer.getguru.com/docs/guru-sync-manual-api#boards))
-- `GURU_BOARD_YAML`: path to a single .yml file containing the details for all boards. It should contain one entry for each board, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#boards)) for that individual board, as follows:
+- `GURU_BOARD_YAML`: path to a single .yaml file containing the details for all boards. It should contain one entry for each board, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#boards)) for that individual board, as follows:
 ```
 Board1:
   Title: Board Title
@@ -65,7 +65,7 @@ Board1:
       Type: "card"
 ```
 - `GURU_BOARDGROUP_DIR`: the path, in your repo, to a directory containing the YAML and markdown files for your board groups ([documentation](https://developer.getguru.com/docs/guru-sync-manual-api#board-groups))
-- `GURU_BOARDGROUP_YAML`: path to a single .yml file containing the details for all board groups. It should contain one entry for each board group, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#board-groups)) for that individual board group, as follows:
+- `GURU_BOARDGROUP_YAML`: path to a single .yaml file containing the details for all board groups. It should contain one entry for each board group, followed by the ([properties](https://developer.getguru.com/docs/guru-sync-manual-api#board-groups)) for that individual board group, as follows:
 ```
 BoardGroup1:
   Title: Board Group One
