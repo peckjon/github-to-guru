@@ -16,7 +16,7 @@ async function syncCollection(tmpdirname, auth, collectionId) {
   let options = {};
   options.cwd=tmpdirname;
   await exec.exec(`zip`, [`-r`,`guru_collection.zip`,`./`], options);
-  // await exec.exec(`curl -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@${tmpdirname}/guru_collection.zip" -D -`);
+  await exec.exec(`curl -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@${tmpdirname}/guru_collection.zip" -D -`);
 }
 
 async function createCard(auth, collectionId, title, content) {
