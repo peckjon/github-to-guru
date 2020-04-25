@@ -16,7 +16,7 @@ async function syncCollection(tmpdirname, auth, collectionId) {
   let options = {};
   options.cwd=tmpdirname;
   await exec.exec(`zip`, [`-r`,`guru_collection.zip`,`./`], options);
-  await exec.exec(`curl -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@${tmpdirname}/guru_collection.zip" -D -`);
+  // await exec.exec(`curl -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@${tmpdirname}/guru_collection.zip" -D -`);
 }
 
 async function createCard(auth, collectionId, title, content) {
@@ -58,9 +58,12 @@ try {
       var tmpdir = tmp.dirSync();
       console.log('TmpDir: ', tmpdir.name);
       if (process.env.GURU_COLLECTION_YAML) {
+        console.log(`Copying ${process.env.GURU_COLLECTION_YAML} to ${tmpdir.name}/collection.yaml`);
         cpfile.sync(process.env.GURU_COLLECTION_YAML,`${tmpdir.name}/collection.yaml`);
       } else {
         console.log(fs.readFileSync(tmpdir.name, "utf8"));
+        console.log(`Writing to ${tmpdir.name}/collection.yaml:`);
+        console.log(cardYaml);
         fs.writeFileSync(`${tmpdir.name}/collection.yaml`, `--- ~\n`);
       }
       fs.mkdirSync(`${tmpdir.name}/cards`);
@@ -73,6 +76,7 @@ Title: "${cards[filename].Title}"
 ExternalId: "${process.env.GITHUB_REPOSITORY}/${filename}"
 ExternalUrl: "https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}"
 `
+        console.log(`Writing to ${tmpdir.name}/cards/${tmpfilename}.yaml:`);
         console.log(cardYaml);
         fs.writeFileSync(`${tmpdir.name}/cards/${tmpfilename}.yaml`, cardYaml);
       } catch (error) {
