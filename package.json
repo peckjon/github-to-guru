@@ -19,7 +19,7 @@
   "homepage": "https://github.com/peckjon/github-to-guru#readme",
   "dependencies": {
     "axios": "^0.19.2",
-    "cp-file": "^9.0.0",
+    "fs-extra": "^9.0.0",
     "tmp": "^0.1.0",
     "yaml": "^1.9.2",
     "@actions/core": "^1.2.3",
