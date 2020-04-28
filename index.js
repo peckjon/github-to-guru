@@ -71,11 +71,11 @@ try {
         console.log(cards[filename].Title);
         let tmpfilename=filename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
         cpfile.sync(filename,`${tmpdir.name}/cards/${tmpfilename}.md`);
-        var cardYaml=`---
-Title: "${cards[filename].Title}"
-ExternalId: "${process.env.GITHUB_REPOSITORY}/${filename}"
-ExternalUrl: "https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}"
-`
+        var cardYaml=yaml.stringify({
+          'Title': `${cards[filename].Title}`,
+          'ExternalId': `${process.env.GITHUB_REPOSITORY}/${filename}`,
+          'ExternalUrl': `https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${filename}`
+        })
         console.log(`Writing to ${tmpdir.name}/cards/${tmpfilename}.yaml:`);
         console.log(cardYaml);
         fs.writeFileSync(`${tmpdir.name}/cards/${tmpfilename}.yaml`, cardYaml);
