@@ -90,6 +90,15 @@ function copyBoardGroupData(targetDir) {
   }
 }
 
+function copyResources(targetDir) {
+  let tmpResourcesDir = `${targetDir}/resources`;
+  if (process.env.GURU_RESOURCES_DIR) {
+    fs.mkdirSync(tmpResourcesDir);
+    console.log(`Copying ${process.env.GURU_RESOURCES_DIR} to ${tmpResourcesDir}`);
+    fs.copySync(process.env.GURU_RESOURCES_DIR, `${tmpResourcesDir}`);
+  }
+}
+
 function processExternalCollection(auth) {
   let tmpdir = tmp.dirSync();
   console.log('tmpdir: ', tmpdir.name);
@@ -98,7 +107,7 @@ function processExternalCollection(auth) {
   copyCollectionData(tmpdir.name);
   copyBoardData(tmpdir.name);
   copyBoardGroupData(tmpdir.name);
-  // copyResources(tmpdir.name);
+  copyResources(tmpdir.name);
   if(process.env.GURU_CARD_YAML) {
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     console.log(cardConfigs)
