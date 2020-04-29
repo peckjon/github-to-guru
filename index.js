@@ -43,20 +43,63 @@ function copyCollectionData(targetDir) {
     fs.copySync(process.env.GURU_COLLECTION_YAML, `${targetDir}/collection.yaml`);
   }
   else {
-    console.log(`Writing to ${targetDir}/collection.yaml:`);
+    console.log(`Writing '---' to ${targetDir}/collection.yaml:`);
     fs.writeFileSync(`${targetDir}/collection.yaml`, `--- ~\n`);
   }
 }
 
+function copyBoardData(targetDir) {
+  let tmpBoardsDir = `${targetDir}/boards`;
+  if (process.env.GURU_BOARD_YAML) {
+    fs.mkdirSync(tmpBoardsDir);
+    let boardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARD_YAML, 'utf8'));
+    console.log(boardConfigs)
+    let i=1;
+    for (let boardName in boardConfigs) {
+      let targetFile = `${tmpBoardsDir}/board${i++}.yaml`
+      console.log(`Writing ${boardName} to ${targetFile}`);
+      let boardYaml=yaml.stringify(boardConfigs[boardName]);
+      fs.writeFileSync(`${targetFile}`, boardYaml);
+    }
+  }
+  else if (process.env.GURU_BOARD_DIR) {
+    fs.mkdirSync(tmpBoardsDir);
+    console.log(`Copying ${process.env.GURU_BOARD_DIR} to ${tmpBoardsDir}`);
+    fs.copySync(process.env.GURU_BOARD_DIR, `${tmpBoardsDir}`);
+  }
+}
+
+function copyBoardGroupData(targetDir) {
+  let tmpBoardGroupsDir = `${targetDir}/board-groups`;
+  if (process.env.GURU_BOARDGROUP_YAML) {
+    fs.mkdirSync(tmpBoardGroupsDir);
+    let boardGroupConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARDGROUP_YAML, 'utf8'));
+    console.log(boardGroupConfigs)
+    let i=1;
+    for (let boardGroupName in boardGroupConfigs) {
+      let targetFile = `${tmpBoardGroupsDir}/board-group${i++}.yaml`
+      console.log(`Writing ${boardGroupName} to ${targetFile}`);
+      let boardGroupYaml=yaml.stringify(boardGroupConfigs[boardGroupName]);
+      fs.writeFileSync(`${targetFile}`, boardGroupYaml);
+    }
+  }
+  else if (process.env.GURU_BOARDGROUP_DIR) {
+    fs.mkdirSync(tmpBoardGroupsDir);
+    console.log(`Copying ${process.env.GURU_BOARDGROUP_DIR} to ${tmpBoardGroupsDir}`);
+    fs.copySync(process.env.GURU_BOARDGROUP_DIR, `${tmpBoardGroupsDir}`);
+  }
+}
+
 function processExternalCollection(auth) {
-  var tmpdir = tmp.dirSync();
+  let tmpdir = tmp.dirSync();
   console.log('tmpdir: ', tmpdir.name);
-  var tmpCardsDir = `${tmpdir.name}/cards`;
+  let tmpCardsDir = `${tmpdir.name}/cards`;
   fs.mkdirSync(tmpCardsDir);
   copyCollectionData(tmpdir.name);
-  if(process.env.GURU_CARD_DIR) {
-    fs.copySync(process.env.GURU_CARD_DIR, tmpCardsDir);
-  } else {
+  copyBoardData(tmpdir.name);
+  copyBoardGroupData(tmpdir.name);
+  // copyResources(tmpdir.name);
+  if(process.env.GURU_CARD_YAML) {
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     console.log(cardConfigs)
     for (let cardFilename in cardConfigs) try {
@@ -64,7 +107,7 @@ function processExternalCollection(auth) {
       while(fs.existsSync(`${tmpCardsDir}/${tmpfileBase}.yaml`)) {
         tmpfileBase+=`_`;
       }
-      console.log(`Creating ${tmpCardsDir}/${tmpfileBase}.yaml`);
+      console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
       fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
       let cardConfig = cardConfigs[cardFilename];
       if (!cardConfig.ExternalId) {
@@ -73,12 +116,15 @@ function processExternalCollection(auth) {
       if (!cardConfig.ExternalUrl) {
         cardConfig.ExternalUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${cardFilename}`
       }
-      var cardYaml=yaml.stringify(cardConfig);
+      let cardYaml=yaml.stringify(cardConfig);
       fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.yaml`, cardYaml);
     } catch (error) {
       core.setFailed(`Unable to prepare tempfiles: ${error.message}`);
       return;
     }
+  } else {
+    console.log(`Copying ${process.env.GURU_CARD_DIR} to ${tmpCardsDir}`);
+    fs.copySync(process.env.GURU_CARD_DIR, tmpCardsDir);
   }
   apiSendSynchedCollection(tmpdir.name,auth,process.env.GURU_COLLECTION_ID).catch(error => {
     core.setFailed(`Unable to sync collection: ${error.message}`);

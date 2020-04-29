@@ -1,4 +1,5 @@
 # GitHub to Guru
+
 Create cards in a Guru collection based on content in a GitHub repo
 
 ## Example usage
@@ -82,6 +83,7 @@ BoardGroup2:
   - board3
 ```
 
-**Notes:** 
+**Notes:**
+
 - You cannot use both the `_DIR` and the `_YAML` way of configuring the same entity type. E.g., if you set both `GURU_CARD_DIR` and `GURU_CARD_YAML`, then `GURU_CARD_DIR` will be ignored.
-- Although the ([Guru documentation](https://developer.getguru.com/docs/guru-sync-manual-api)) requires an ExternalId and ExternalUrl for most items, you can choose to omit them here; the action can auto-generate these properties for you.
+- Although the ([Guru documentation](https://developer.getguru.com/docs/guru-sync-manual-api)) requires an ExternalId and ExternalUrl for most items, you can choose to omit them here for **cards** only; the action can auto-generate these properties for you.

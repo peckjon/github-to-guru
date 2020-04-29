@@ -1,0 +1,11 @@
+README.md:
+  Tags:
+    - "Subject One"
+    - "Subject Two"
+  Title: "Test Card 1 using GURU_CARD_YAML created by github.com/peckjon/github-to-guru"
+  ExternalId: peckjon/github-to-guru-test/test_external_id.md
+  ExternalUrl: https://github.com/peckjon/github-to-guru-test/blob/master/ignoreme/cards/test1.md
+ignoreme/README2.md:
+  Tags:
+    - "Subject One"
+  Title: "Test Card 2 using GURU_CARD_YAML created by github.com/peckjon/github-to-guru"
