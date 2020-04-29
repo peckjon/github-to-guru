@@ -1,6 +1,14 @@
 # GitHub to Guru
 
-Create cards in a Guru collection based on content in a GitHub repo
+**Deploy content from your GitHub repo into a Guru collection.**
+
+For standard collections, this action can add cards based on markdown files in your repository.
+
+For [synchronized collections](https://help.getguru.com/articles/T8eX5e5c/Knowledge-Sync-Overview), it can add and replace cards, boards, board groups, and resources.
+
+Configuration can be performed by adding one YAML file per markdown file, or by adding a single `cards.yaml` file (minimal impact to your existing repo structure).
+
+Since this is an action, you can build other logic on top, such as splitting up a single markdown file into many Guru cards.
 
 ## Example usage
 
