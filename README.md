@@ -82,7 +82,7 @@ BoardGroup2:
   - board2
   - board3
 ```
--`GURU_RESOURCES_DIR`: the path, in your repo, of a directory whose files should be added as [resources](https://developer.getguru.com/docs/guru-sync-manual-api#resources)
+- `GURU_RESOURCES_DIR`: the path, in your repo, of a directory whose files should be added as [resources](https://developer.getguru.com/docs/guru-sync-manual-api#resources)
 
 **Notes:**
 
