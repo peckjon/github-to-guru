@@ -4,7 +4,7 @@
 
 For standard collections, this action can add cards based on markdown files in your repository.
 
-For [synchronized collections](https://help.getguru.com/articles/T8eX5e5c/Knowledge-Sync-Overview), it can add and replace cards, boards, board groups, and resources.
+For [synchronized collections](https://help.getguru.com/articles/T8eX5e5c/Knowledge-Sync-Overview), it can add and replace cards, boards, board groups, and resources (see [appendix](#appendix-creating-a-synchronized-collection) for details).
 
 Configuration can be performed by adding one YAML file per markdown file, or by adding a single `cards.yaml` file (minimal impact to your existing repo structure).
 
@@ -96,3 +96,19 @@ BoardGroup2:
 
 - You cannot use both the `_DIR` and the `_YAML` way of configuring the same entity type. E.g., if you set both `GURU_CARD_DIR` and `GURU_CARD_YAML`, then `GURU_CARD_DIR` will be ignored.
 - Although the ([Guru documentation](https://developer.getguru.com/docs/guru-sync-manual-api)) requires an ExternalId and ExternalUrl for most items, you can choose to omit them here for **cards** only; the action can auto-generate these properties for you.
+
+### Appendix: creating a synchronized collection
+
+1. Get the ID of a User Group as per https://developer.getguru.com/reference#groups
+2. Make a POST to https://api.getguru.com/api/v1/collections of the form:
+```
+{
+  "name": "My Synced Collection",
+  "collectionType": "EXTERNAL",
+  "description": "",
+  "color": "#F44336",
+  "publicCardsEnabled": false,
+  "syncVerificationEnabled": false,
+  "initialAdminGroupId": "(GROUP_ID)"
+}
+```
