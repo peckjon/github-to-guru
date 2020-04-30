@@ -19,4 +19,4 @@ jobs:
         GURU_COLLECTION_YAML: 'sample-config/collection.yaml'
         GURU_CARD_YAML: 'sample-config/cards.yaml'
         GURU_BOARD_YAML: 'sample-config/boards.yaml'
-        GURU_BOARDGROUP_YAML: 'sample-config/boardgroup.yaml'
+        GURU_BOARDGROUP_YAML: 'sample-config/boardgroups.yaml'
