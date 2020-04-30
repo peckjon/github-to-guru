@@ -96,6 +96,7 @@ BoardGroup2:
 
 - You cannot use both the `_DIR` and the `_YAML` way of configuring the same entity type. E.g., if you set both `GURU_CARD_DIR` and `GURU_CARD_YAML`, then `GURU_CARD_DIR` will be ignored.
 - Although the ([Guru documentation](https://developer.getguru.com/docs/guru-sync-manual-api)) requires an ExternalId and ExternalUrl for most items, you can choose to omit them here for **cards** only; the action can auto-generate these properties for you.
+- "Synchronized" collections take a few minutes to finish; you can check their status at `https://api.getguru.com/api/v1/import/JOBID/status`, where JOBID is the "jobId" shown at the end of the `peckjon/github-to-guru@master` step in your workflow's execution log.
 
 ### Appendix: creating a synchronized collection
 
