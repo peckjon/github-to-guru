@@ -2,7 +2,7 @@ Board1:
   Title: GitHub to Guru Content Migration
   Description: Testing GitHub-to-Guru Board Groups
   Items:
-  - ID: "card1"
+  - ID: "README"
     Type: "card"
   ExternalId: github-to-guru-board1
   ExternalUrl: https://github.com/peckjon/github-to-guru
