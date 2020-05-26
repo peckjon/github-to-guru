@@ -10,6 +10,8 @@ Configuration can be performed by adding one YAML file per markdown file, or by 
 
 Since this is an action, you can build other logic on top, such as splitting up a single markdown file into many Guru cards.
 
+![screenshot](github_to_guru.png)
+
 ## Example usage
 
 1. Add a Secret named `GURU_USER_TOKEN` containing a [User Token for Guru](https://help.getguru.com/articles/XipkRKLi/Guru-API-Overview)
