@@ -9,14 +9,11 @@ jobs:
   guru:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: peckjon/github-to-guru@master
-      env:
-        GURU_USER_EMAIL:  '${{ secrets.GURU_USER_EMAIL }}'
-        GURU_USER_TOKEN:  '${{ secrets.GURU_USER_TOKEN }}'
-        GURU_COLLECTION_ID: 'a12638ec-a2d1-4f18-9376-ef692e977a66' #EXTERNAL
-        # GURU_COLLECTION_ID: '7c9b542d-8b8b-4b79-9925-80289e62e430' #INTERNAL
-        GURU_COLLECTION_YAML: 'sample-config/collection.yaml'
-        GURU_CARD_YAML: 'sample-config/cards.yaml'
-        GURU_BOARD_YAML: 'sample-config/boards.yaml'
-        GURU_BOARDGROUP_YAML: 'sample-config/boardgroups.yaml'
+      - uses: actions/checkout@v1
+      - uses: partnerstack/github-to-guru@master
+        env:
+          GURU_USER_EMAIL: "${{ secrets.GURU_USER_EMAIL }}"
+          GURU_USER_TOKEN: "${{ secrets.GURU_USER_TOKEN }}"
+          GURU_COLLECTION_ID: "${{ secrets.GURU_COLLECTION_ID }}"
+          GURU_COLLECTION_YAML: "collections/collection.yaml"
+          GURU_CARD_YAML: "cards.yaml"
