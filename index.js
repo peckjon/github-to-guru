@@ -55,7 +55,7 @@ async function apiSendStandardCard(auth, collectionId, title, externalId, conten
           auth,
           process.env.GURU_COLLECTION_ID,
           cardConfigs[cardFileName].Title,
-          id,
+          response.id,
           fs.readFileSync(cardFilename, "utf8")
         ).then(response => {
           console.log(`Updated card for ${cardFilename}`);
