@@ -109,7 +109,7 @@ async function apiUpdateStandardCardById(auth, collectionId, title, id, content)
     shareStatus: "TEAM",
     id: id
   }
-  return axios.post(`https://api.getguru.com/api/v1/cards/${id}/extended`, data, headers)
+  return axios.put(`https://api.getguru.com/api/v1/cards/${id}/extended`, data, headers)
 }
 
 function copyCollectionData(targetDir) {
