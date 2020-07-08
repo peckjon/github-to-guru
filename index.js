@@ -64,7 +64,7 @@ async function apiSendStandardCard(auth, collectionId, title, externalId, conten
             ).then(response => {
               console.log(`Updated card`);
             }).catch(error => {
-              core.setFailed(`Unable to update card: ${error.message}`);
+              core.setFailed(`Unable to update card: ${error}`);
             });
           } catch (error) {
             core.setFailed(`Unable to prepare card: ${error.message}`);
