@@ -72,6 +72,7 @@ async function apiSendStandardCard(auth, collectionId, title, externalId, conten
           }
         } else {
           // 2b. If card does not exist, call to create a new card.
+          console.log("Creating a new card.")
           return axios.post(`https://api.getguru.com/api/v1/facts/extended`, data, headers)
         }
       }).catch(error => {
