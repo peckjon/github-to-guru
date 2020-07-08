@@ -24,7 +24,7 @@ async function apiSendSynchedCollection(sourceDir, auth, collectionId) {
 }
 
 async function apiSendStandardCard(auth, collectionId, title, externalId, content) {
-  console.log(`creating card in ${collectionId}: ${title} with externalId ${externalId}`)
+  console.log(`Creating or Updating card in ${collectionId}: ${title} with externalId ${externalId}`)
   let headers = {
     auth: auth,
     'content-type': `application/json`
@@ -80,17 +80,19 @@ async function apiSendStandardCard(auth, collectionId, title, externalId, conten
 }
 
 async function apiSearchCardByExternalId(auth, collectionId, externalId) {
-  console.log(`searching for card in ${collectionId} collection with externalId: ${externalId}`)
-  let data = {
-    searchTerms: externalId,
-    queryType: "cards",
-  }
-  querystring = querystring.stringify(data)
-  return axios.get(`https://api.getguru.com/api/v1/search/query?${querystring}`, { auth: auth })
+  console.log(`Searching for card in ${collectionId} collection with externalId: ${externalId}`)
+  // let data = {
+  //   searchTerms: externalId,
+  //   queryType: "cards",
+  // }
+  // querystring = querystring.stringify(data)
+  response = axios.get(`https://api.getguru.com/api/v1/search/query?searchTerms=externalId&queryType=cards`, { auth: auth })
+  console.log("Search response: ", response)
+  return response
 }
 
 async function apiUpdateStandardCardById(auth, collectionId, title, id, content) {
-  console.log(`updating card in ${collectionId}: ${title} with ID ${id}`)
+  console.log(`Updating card in ${collectionId}: ${title} with ID ${id}`)
   let headers = {
     auth: auth,
     'content-type': `application/json`
