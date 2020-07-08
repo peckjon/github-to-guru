@@ -51,6 +51,7 @@ async function apiSendStandardCard(auth, collectionId, title, externalId, conten
         let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
         console.log(cardConfigs)
         for (let cardFilename in cardConfigs) try {
+          console.log("RESPONSE", response)
           console.log(`Found existing card for ${cardFilename} with externalId ${externalId}`);
           console.log(`Updating card for ${cardFilename} with Id ${response.id}`);
           // 2a. If card exists, call to update existing card by id (not by externalId).
