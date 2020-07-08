@@ -48,25 +48,30 @@ async function apiSendStandardCard(auth, collectionId, title, externalId, conten
         cardConfigs[cardFilename].ExternalId,
         fs.readFileSync(cardFilename, "utf8")
       ).then(response => {
-        let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
-        console.log(cardConfigs)
-        for (let cardFilename in cardConfigs) try {
-          console.log(`Found existing card for ${cardFilename} with externalId ${externalId}`);
-          console.log(`Updating card for ${cardFilename} with Id ${response.data[0].id}`);
-          // 2a. If card exists, call to update existing card by id (not by externalId).
-          apiUpdateStandardCardById(
-            auth,
-            process.env.GURU_COLLECTION_ID,
-            cardConfigs[cardFilename].Title,
-            response.id,
-            fs.readFileSync(cardFilename, "utf8")
-          ).then(response => {
-            console.log(`Updated card`);
-          }).catch(error => {
-            core.setFailed(`Unable to update card: ${error.message}`);
-          });
-        } catch (error) {
-          core.setFailed(`Unable to prepare card: ${error.message}`);
+        // 2a. If card exists, call to update existing card by id (not by externalId).
+        if (response.data !== undefined) {
+          let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
+          console.log(cardConfigs)
+          for (let cardFilename in cardConfigs) try {
+            console.log(`Found existing card for ${cardFilename} with externalId ${externalId}`);
+            console.log(`Updating card for ${cardFilename} with Id ${response.data[0].id}`);
+            apiUpdateStandardCardById(
+              auth,
+              process.env.GURU_COLLECTION_ID,
+              cardConfigs[cardFilename].Title,
+              response.id,
+              fs.readFileSync(cardFilename, "utf8")
+            ).then(response => {
+              console.log(`Updated card`);
+            }).catch(error => {
+              core.setFailed(`Unable to update card: ${error.message}`);
+            });
+          } catch (error) {
+            core.setFailed(`Unable to prepare card: ${error.message}`);
+          }
+        } else {
+          // 2b. If card does not exist, call to create a new card.
+          return axios.post(`https://api.getguru.com/api/v1/facts/extended`, data, headers)
         }
       }).catch(error => {
         core.setFailed(`Unable to create card: ${error.message}`);
@@ -74,8 +79,6 @@ async function apiSendStandardCard(auth, collectionId, title, externalId, conten
     } catch (error) {
       core.setFailed(`Unable to find card: ${error.message}`);
     }
-    // 2b. If card does not exist, call to create a new card.
-    return axios.post(`https://api.getguru.com/api/v1/facts/extended`, data, headers)
   }
 }
 
