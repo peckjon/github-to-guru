@@ -49,7 +49,7 @@ async function apiSendStandardCard(auth, collectionId, title, externalId, conten
         fs.readFileSync(cardFilename, "utf8")
       ).then(response => {
         // 2a. If card exists, call to update existing card by id (not by externalId).
-        if (response.data !== undefined) {
+        if (response.data.length >= 1) {
           let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
           console.log(cardConfigs)
           for (let cardFilename in cardConfigs) try {
@@ -60,11 +60,12 @@ async function apiSendStandardCard(auth, collectionId, title, externalId, conten
               process.env.GURU_COLLECTION_ID,
               cardConfigs[cardFilename].Title,
               response.data[0].id,
-              fs.readFileSync(cardFilename, "utf8")
+              fs.readFileSync(cardFilename, "utf8"),
+              content
             ).then(response => {
               console.log(`Updated card`);
             }).catch(error => {
-              core.setFailed(`Unable to update card: ${error}`);
+              core.setFailed(`Unable to update card: ${error.message}`);
             });
           } catch (error) {
             core.setFailed(`Unable to prepare card: ${error.message}`);
