@@ -18,12 +18,12 @@
   },
   "homepage": "https://github.com/peckjon/github-to-guru#readme",
   "dependencies": {
-    "axios": "^0.19.2",
-    "fs-extra": "^9.0.0",
-    "tmp": "^0.1.0",
-    "yaml": "^1.9.2",
     "@actions/core": "^1.2.6",
-    "@actions/exec": "^1.0.3",
-    "@actions/github": "^2.1.1"
+    "@actions/exec": "^1.0.4",
+    "@actions/github": "^2.2.0",
+    "axios": "^0.19.2",
+    "fs-extra": "^9.0.1",
+    "tmp": "^0.1.0",
+    "yaml": "^1.10.0"
   }
 }
