@@ -12,6 +12,7 @@ async function getCollection(auth, collectionId) {
 }
 
 async function apiSendSynchedCollection(sourceDir, auth, collectionId) {
+  console.log(`\n--- SENDING ZIPFILE ---`);
   let options = {};
   options.cwd=sourceDir;
   await exec.exec(`zip`, [`-r`,`guru_collection.zip`,`./`], options);
@@ -38,7 +39,7 @@ async function apiSendStandardCard(auth, collectionId, title, content) {
 }
 
 function copyCollectionData(targetDir) {
-  console.log(`--- PROCESSING COLLECTION DATA---`);
+  console.log(`\n--- PROCESSING COLLECTION DATA---`);
   if (process.env.GURU_COLLECTION_YAML) {
     console.log(`Copying ${process.env.GURU_COLLECTION_YAML} to ${targetDir}/collection.yaml`);
     fs.copySync(process.env.GURU_COLLECTION_YAML, `${targetDir}/collection.yaml`);
@@ -49,13 +50,12 @@ function copyCollectionData(targetDir) {
   }
 }
 
-function copyCardData(targetDir) {
-  console.log(`--- PROCESSING CARD DATA---`);
-  let tmpCardsDir = `${targetDir}/cards`;
+function copyCardData(tmpCardsDir) {
+  console.log(`\n--- PROCESSING CARD DATA ---`);
   fs.mkdirSync(tmpCardsDir);
   if(process.env.GURU_CARD_YAML) {
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
-    console.log(cardConfigs)
+    console.log(yaml.stringify(cardConfigs))
     for (let cardFilename in cardConfigs) try {
       if(!fs.existsSync(cardFilename)) {
         core.setFailed(`Cannot find file specified in ${process.env.GURU_CARD_YAML}: ${cardFilename}`);
@@ -87,15 +87,21 @@ function copyCardData(targetDir) {
   }
 }
 
-function copyBoardData(targetDir) {
-  console.log(`--- PROCESSING BOARD DATA---`);
-  let tmpBoardsDir = `${targetDir}/boards`;
+function copyBoardData(tmpBoardsDir, cardFileList) {
+  console.log(`\n--- PROCESSING BOARD DATA---`);
   if (process.env.GURU_BOARD_YAML) {
     fs.mkdirSync(tmpBoardsDir);
     let boardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARD_YAML, 'utf8'));
-    console.log(boardConfigs)
+    console.log(yaml.stringify(boardConfigs))
     let i=1;
     for (let boardName in boardConfigs) {
+      for (let item in boardConfigs[boardName]['Items']) {
+        let cardYamlFile = boardConfigs[boardName]['Items'][item].ID+'.yaml';
+        if (!cardFileList.includes(cardYamlFile)) {
+          core.setFailed(`Error in board ${boardName}: cannot find ${cardYamlFile} in cards [${cardFileList}]`);
+          return;
+        }
+      }
       let targetFile = `${tmpBoardsDir}/board${i++}.yaml`
       console.log(`Writing ${boardName} to ${targetFile}`);
       let boardYaml=yaml.stringify(boardConfigs[boardName]);
@@ -109,13 +115,12 @@ function copyBoardData(targetDir) {
   }
 }
 
-function copyBoardGroupData(targetDir) {
-  console.log(`--- PROCESSING BOARDGROUP DATA---`);
-  let tmpBoardGroupsDir = `${targetDir}/board-groups`;
+function copyBoardGroupData(tmpBoardGroupsDir) {
+  console.log(`\n--- PROCESSING BOARDGROUP DATA ---`);
   if (process.env.GURU_BOARDGROUP_YAML) {
     fs.mkdirSync(tmpBoardGroupsDir);
     let boardGroupConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARDGROUP_YAML, 'utf8'));
-    console.log(boardGroupConfigs)
+    console.log(yaml.stringify(boardGroupConfigs));
     let i=1;
     for (let boardGroupName in boardGroupConfigs) {
       let targetFile = `${tmpBoardGroupsDir}/board-group${i++}.yaml`
@@ -131,9 +136,8 @@ function copyBoardGroupData(targetDir) {
   }
 }
 
-function copyResources(targetDir) {
-  console.log(`--- PROCESSING RESOURCES ---`);
-  let tmpResourcesDir = `${targetDir}/resources`;
+function copyResources(tmpResourcesDir) {
+  console.log(`\n--- PROCESSING RESOURCES ---`);
   if (process.env.GURU_RESOURCES_DIR) {
     fs.mkdirSync(tmpResourcesDir);
     console.log(`Copying ${process.env.GURU_RESOURCES_DIR} to ${tmpResourcesDir}`);
@@ -144,11 +148,16 @@ function copyResources(targetDir) {
 function processExternalCollection(auth) {
   let tmpdir = tmp.dirSync();
   console.log('tmpdir: ', tmpdir.name);
+  let tmpBoardGroupsDir = `${tmpdir.name}/board-groups`;
+  let tmpResourcesDir = `${tmpdir.name}/resources`;
+  let tmpBoardsDir = `${tmpdir.name}/boards`;
+  let tmpCardsDir = `${tmpdir.name}/cards`;
   copyCollectionData(tmpdir.name);
-  copyCardData(tmpdir.name);
-  copyBoardData(tmpdir.name);
-  copyBoardGroupData(tmpdir.name);
-  copyResources(tmpdir.name);
+  copyCardData(tmpCardsDir);
+  let cardFileList = fs.readdirSync(tmpCardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
+  copyBoardData(tmpBoardsDir, cardFileList);
+  copyBoardGroupData(tmpBoardGroupsDir);
+  copyResources(tmpResourcesDir);
   apiSendSynchedCollection(tmpdir.name,auth,process.env.GURU_COLLECTION_ID).catch(error => {
     core.setFailed(`Unable to sync collection: ${error.message}`);
   });
@@ -193,15 +202,15 @@ try {
       return;
     }
     if(
-      (process.env.GURU_CARD_DIR && (process.env.GURU_CARD_DIR in [process.env.GURU_BOARD_DIR, process.env.GURU_BOARDGROUP_DIR]) )
+      (process.env.GURU_CARD_DIR && ([process.env.GURU_BOARD_DIR, process.env.GURU_BOARDGROUP_DIR].includes(process.env.GURU_CARD_DIR)) )
       || (process.env.GURU_BOARD_DIR && (process.env.GURU_BOARD_DIR == process.env.GURU_BOARDGROUP_DIR) )
       ) {
       core.setFailed(`GURU_CARD_DIR, GURU_BOARD_DIR, and GURU_BOARDGROUP_DIR must be different.`);
       return;
     }
     if(
-      (process.env.GURU_COLLECTION_YAML && process.env.GURU_COLLECTION_YAML in [process.env.GURU_CARD_YAML, process.env.GURU_BOARD_YAML, process.env.GURU_BOARDGOUP_YAML])
-      || (process.env.GURU_CARD_YAML && (process.env.GURU_CARD_YAML in [process.env.GURU_BOARD_YAML, process.env.GURU_BOARDGROUP_YAML]) )
+      (process.env.GURU_COLLECTION_YAML && [process.env.GURU_CARD_YAML, process.env.GURU_BOARD_YAML, process.env.GURU_BOARDGOUP_YAML].includes(process.env.GURU_COLLECTION_YAML))
+      || (process.env.GURU_CARD_YAML && ([process.env.GURU_BOARD_YAML, process.env.GURU_BOARDGROUP_YAML].includes(process.env.GURU_CARD_YAML)) )
       || (process.env.GURU_BOARD_YAML && (process.env.GURU_BOARD_YAML == process.env.GURU_BOARDGROUP_YAML) )
       ) {
       core.setFailed(`GURU_COLLECTION_YAML, GURU_CARD_YAML, GURU_BOARD_YAML, and GURU_BOARDGROUP_YAML must be different.`);
