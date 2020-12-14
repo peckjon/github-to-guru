@@ -112,6 +112,10 @@ function processExternalCollection(auth) {
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     console.log(cardConfigs)
     for (let cardFilename in cardConfigs) try {
+      if(!fs.existsSync(cardFilename)) {
+        core.setFailed(`Cannot find file specified in ${process.env.GURU_CARD_YAML}: ${cardFilename}`);
+        return;
+      };
       let tmpfileBase=cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
       while(fs.existsSync(`${tmpCardsDir}/${tmpfileBase}.yaml`)) {
         tmpfileBase+=`_`;
