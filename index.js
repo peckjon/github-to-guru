@@ -38,6 +38,7 @@ async function apiSendStandardCard(auth, collectionId, title, content) {
 }
 
 function copyCollectionData(targetDir) {
+  console.log(`--- PROCESSING COLLECTION DATA---`);
   if (process.env.GURU_COLLECTION_YAML) {
     console.log(`Copying ${process.env.GURU_COLLECTION_YAML} to ${targetDir}/collection.yaml`);
     fs.copySync(process.env.GURU_COLLECTION_YAML, `${targetDir}/collection.yaml`);
@@ -48,7 +49,46 @@ function copyCollectionData(targetDir) {
   }
 }
 
+function copyCardData(targetDir) {
+  console.log(`--- PROCESSING CARD DATA---`);
+  let tmpCardsDir = `${targetDir}/cards`;
+  fs.mkdirSync(tmpCardsDir);
+  if(process.env.GURU_CARD_YAML) {
+    let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
+    console.log(cardConfigs)
+    for (let cardFilename in cardConfigs) try {
+      if(!fs.existsSync(cardFilename)) {
+        core.setFailed(`Cannot find file specified in ${process.env.GURU_CARD_YAML}: ${cardFilename}`);
+        return;
+      };
+      let tmpfileBase=cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
+      while(fs.existsSync(`${tmpCardsDir}/${tmpfileBase}.yaml`)) {
+        tmpfileBase+=`_`;
+      }
+      console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
+      if(!fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`)) {
+      };
+      let cardConfig = cardConfigs[cardFilename];
+      if (!cardConfig.ExternalId) {
+        cardConfig.ExternalId = `${process.env.GITHUB_REPOSITORY}/${cardFilename}`
+      }
+      if (!cardConfig.ExternalUrl) {
+        cardConfig.ExternalUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${cardFilename}`
+      }
+      let cardYaml=yaml.stringify(cardConfig);
+      fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.yaml`, cardYaml);
+    } catch (error) {
+      core.setFailed(`Unable to prepare tempfiles: ${error.message}`);
+      return;
+    }
+  } else {
+    console.log(`Copying ${process.env.GURU_CARD_DIR} to ${tmpCardsDir}`);
+    fs.copySync(process.env.GURU_CARD_DIR, tmpCardsDir);
+  }
+}
+
 function copyBoardData(targetDir) {
+  console.log(`--- PROCESSING BOARD DATA---`);
   let tmpBoardsDir = `${targetDir}/boards`;
   if (process.env.GURU_BOARD_YAML) {
     fs.mkdirSync(tmpBoardsDir);
@@ -70,6 +110,7 @@ function copyBoardData(targetDir) {
 }
 
 function copyBoardGroupData(targetDir) {
+  console.log(`--- PROCESSING BOARDGROUP DATA---`);
   let tmpBoardGroupsDir = `${targetDir}/board-groups`;
   if (process.env.GURU_BOARDGROUP_YAML) {
     fs.mkdirSync(tmpBoardGroupsDir);
@@ -91,6 +132,7 @@ function copyBoardGroupData(targetDir) {
 }
 
 function copyResources(targetDir) {
+  console.log(`--- PROCESSING RESOURCES ---`);
   let tmpResourcesDir = `${targetDir}/resources`;
   if (process.env.GURU_RESOURCES_DIR) {
     fs.mkdirSync(tmpResourcesDir);
@@ -102,43 +144,11 @@ function copyResources(targetDir) {
 function processExternalCollection(auth) {
   let tmpdir = tmp.dirSync();
   console.log('tmpdir: ', tmpdir.name);
-  let tmpCardsDir = `${tmpdir.name}/cards`;
-  fs.mkdirSync(tmpCardsDir);
   copyCollectionData(tmpdir.name);
+  copyCardData(tmpdir.name);
   copyBoardData(tmpdir.name);
   copyBoardGroupData(tmpdir.name);
   copyResources(tmpdir.name);
-  if(process.env.GURU_CARD_YAML) {
-    let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
-    console.log(cardConfigs)
-    for (let cardFilename in cardConfigs) try {
-      if(!fs.existsSync(cardFilename)) {
-        core.setFailed(`Cannot find file specified in ${process.env.GURU_CARD_YAML}: ${cardFilename}`);
-        return;
-      };
-      let tmpfileBase=cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
-      while(fs.existsSync(`${tmpCardsDir}/${tmpfileBase}.yaml`)) {
-        tmpfileBase+=`_`;
-      }
-      console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
-      fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
-      let cardConfig = cardConfigs[cardFilename];
-      if (!cardConfig.ExternalId) {
-        cardConfig.ExternalId = `${process.env.GITHUB_REPOSITORY}/${cardFilename}`
-      }
-      if (!cardConfig.ExternalUrl) {
-        cardConfig.ExternalUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${cardFilename}`
-      }
-      let cardYaml=yaml.stringify(cardConfig);
-      fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.yaml`, cardYaml);
-    } catch (error) {
-      core.setFailed(`Unable to prepare tempfiles: ${error.message}`);
-      return;
-    }
-  } else {
-    console.log(`Copying ${process.env.GURU_CARD_DIR} to ${tmpCardsDir}`);
-    fs.copySync(process.env.GURU_CARD_DIR, tmpCardsDir);
-  }
   apiSendSynchedCollection(tmpdir.name,auth,process.env.GURU_COLLECTION_ID).catch(error => {
     core.setFailed(`Unable to sync collection: ${error.message}`);
   });
