@@ -52,7 +52,6 @@ function copyCollectionData(targetDir) {
 
 function copyCardData(tmpCardsDir) {
   console.log(`\n--- PROCESSING CARD DATA ---`);
-  fs.mkdirSync(tmpCardsDir);
   if(process.env.GURU_CARD_YAML) {
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     console.log(yaml.stringify(cardConfigs))
@@ -90,7 +89,6 @@ function copyCardData(tmpCardsDir) {
 function copyBoardData(tmpBoardsDir, cardFileList) {
   console.log(`\n--- PROCESSING BOARD DATA---`);
   if (process.env.GURU_BOARD_YAML) {
-    fs.mkdirSync(tmpBoardsDir);
     let boardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARD_YAML, 'utf8'));
     console.log(yaml.stringify(boardConfigs))
     let i=1;
@@ -109,7 +107,6 @@ function copyBoardData(tmpBoardsDir, cardFileList) {
     }
   }
   else if (process.env.GURU_BOARD_DIR) {
-    fs.mkdirSync(tmpBoardsDir);
     console.log(`Copying ${process.env.GURU_BOARD_DIR} to ${tmpBoardsDir}`);
     fs.copySync(process.env.GURU_BOARD_DIR, `${tmpBoardsDir}`);
   }
@@ -118,7 +115,6 @@ function copyBoardData(tmpBoardsDir, cardFileList) {
 function copyBoardGroupData(tmpBoardGroupsDir, boardFileList) {
   console.log(`\n--- PROCESSING BOARDGROUP DATA ---`);
   if (process.env.GURU_BOARDGROUP_YAML) {
-    fs.mkdirSync(tmpBoardGroupsDir);
     let boardGroupConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARDGROUP_YAML, 'utf8'));
     console.log(yaml.stringify(boardGroupConfigs));
     let i=1;
@@ -137,7 +133,6 @@ function copyBoardGroupData(tmpBoardGroupsDir, boardFileList) {
     }
   }
   else if (process.env.GURU_BOARDGROUP_DIR) {
-    fs.mkdirSync(tmpBoardGroupsDir);
     console.log(`Copying ${process.env.GURU_BOARDGROUP_DIR} to ${tmpBoardGroupsDir}`);
     fs.copySync(process.env.GURU_BOARDGROUP_DIR, `${tmpBoardGroupsDir}`);
   }
@@ -146,19 +141,24 @@ function copyBoardGroupData(tmpBoardGroupsDir, boardFileList) {
 function copyResources(tmpResourcesDir) {
   console.log(`\n--- PROCESSING RESOURCES ---`);
   if (process.env.GURU_RESOURCES_DIR) {
-    fs.mkdirSync(tmpResourcesDir);
     console.log(`Copying ${process.env.GURU_RESOURCES_DIR} to ${tmpResourcesDir}`);
     fs.copySync(process.env.GURU_RESOURCES_DIR, `${tmpResourcesDir}`);
   }
 }
 
 function processExternalCollection(auth) {
+  //create tmp dirs to hold zipfile data
   let tmpdir = tmp.dirSync();
   console.log('tmpdir: ', tmpdir.name);
-  let tmpBoardGroupsDir = `${tmpdir.name}/board-groups`;
-  let tmpResourcesDir = `${tmpdir.name}/resources`;
-  let tmpBoardsDir = `${tmpdir.name}/boards`;
   let tmpCardsDir = `${tmpdir.name}/cards`;
+  fs.mkdirSync(tmpCardsDir);
+  let tmpBoardsDir = `${tmpdir.name}/boards`;
+  fs.mkdirSync(tmpBoardsDir);
+  let tmpResourcesDir = `${tmpdir.name}/resources`;
+  fs.mkdirSync(tmpResourcesDir);
+  let tmpBoardGroupsDir = `${tmpdir.name}/board-groups`;
+  fs.mkdirSync(tmpBoardGroupsDir);
+  //populate collection, card, board, boardgorup, resources
   copyCollectionData(tmpdir.name);
   copyCardData(tmpCardsDir);
   let cardFileList = fs.readdirSync(tmpCardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
@@ -166,6 +166,7 @@ function processExternalCollection(auth) {
   let boardFileList = fs.readdirSync(tmpBoardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
   copyBoardGroupData(tmpBoardGroupsDir, boardFileList);
   copyResources(tmpResourcesDir);
+  //zip and send to Guru
   apiSendSynchedCollection(tmpdir.name,auth,process.env.GURU_COLLECTION_ID).catch(error => {
     core.setFailed(`Unable to sync collection: ${error.message}`);
   });
