@@ -178,6 +178,21 @@ try {
       core.setFailed(`Specify either GURU_CARD_DIR or GURU_CARD_YAML`);
       return;
     }
+    if(
+      (process.env.GURU_CARD_DIR && (process.env.GURU_CARD_DIR in [process.env.GURU_BOARD_DIR, process.env.GURU_BOARDGROUP_DIR]) )
+      || (process.env.GURU_BOARD_DIR && (process.env.GURU_BOARD_DIR == process.env.GURU_BOARDGROUP_DIR) )
+      ) {
+      core.setFailed(`GURU_CARD_DIR, GURU_BOARD_DIR, and GURU_BOARDGROUP_DIR must be different.`);
+      return;
+    }
+    if(
+      (process.env.GURU_COLLECTION_YAML && process.env.GURU_COLLECTION_YAML in [process.env.GURU_CARD_YAML, process.env.GURU_BOARD_YAML, process.env.GURU_BOARDGOUP_YAML])
+      || (process.env.GURU_CARD_YAML && (process.env.GURU_CARD_YAML in [process.env.GURU_BOARD_YAML, process.env.GURU_BOARDGROUP_YAML]) )
+      || (process.env.GURU_BOARD_YAML && (process.env.GURU_BOARD_YAML == process.env.GURU_BOARDGROUP_YAML) )
+      ) {
+      core.setFailed(`GURU_COLLECTION_YAML, GURU_CARD_YAML, GURU_BOARD_YAML, and GURU_BOARDGROUP_YAML must be different.`);
+      return;
+    }
     if(isExternalCollection) {
       processExternalCollection(auth);
     } else {
