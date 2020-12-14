@@ -115,7 +115,7 @@ function copyBoardData(tmpBoardsDir, cardFileList) {
   }
 }
 
-function copyBoardGroupData(tmpBoardGroupsDir) {
+function copyBoardGroupData(tmpBoardGroupsDir, boardFileList) {
   console.log(`\n--- PROCESSING BOARDGROUP DATA ---`);
   if (process.env.GURU_BOARDGROUP_YAML) {
     fs.mkdirSync(tmpBoardGroupsDir);
@@ -123,6 +123,13 @@ function copyBoardGroupData(tmpBoardGroupsDir) {
     console.log(yaml.stringify(boardGroupConfigs));
     let i=1;
     for (let boardGroupName in boardGroupConfigs) {
+      for (let item in boardGroupConfigs[boardGroupName]['Boards']) {
+        let boardYamlFile = boardGroupConfigs[boardGroupName]['Boards'][item]+'.yaml';
+        if (!boardFileList.includes(boardYamlFile)) {
+          core.setFailed(`Error in boardgroup ${boardGroupName}: cannot find ${boardYamlFile} in cards [${boardFileList}]`);
+          return;
+        }
+      }
       let targetFile = `${tmpBoardGroupsDir}/board-group${i++}.yaml`
       console.log(`Writing ${boardGroupName} to ${targetFile}`);
       let boardGroupYaml=yaml.stringify(boardGroupConfigs[boardGroupName]);
@@ -156,7 +163,8 @@ function processExternalCollection(auth) {
   copyCardData(tmpCardsDir);
   let cardFileList = fs.readdirSync(tmpCardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
   copyBoardData(tmpBoardsDir, cardFileList);
-  copyBoardGroupData(tmpBoardGroupsDir);
+  let boardFileList = fs.readdirSync(tmpBoardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
+  copyBoardGroupData(tmpBoardGroupsDir, boardFileList);
   copyResources(tmpResourcesDir);
   apiSendSynchedCollection(tmpdir.name,auth,process.env.GURU_COLLECTION_ID).catch(error => {
     core.setFailed(`Unable to sync collection: ${error.message}`);
