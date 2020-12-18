@@ -84,7 +84,7 @@ function copyCardData(tmpCardsDir) {
     fs.copySync(process.env.GURU_CARD_DIR, tmpCardsDir);
   }
   if (process.env.GURU_CARD_FOOTER) {
-    let cardFooter = '\n---\n'+process.env.GURU_CARD_FOOTER;
+    let cardFooter = `\n---\n${process.env.GURU_CARD_FOOTER}\n`;
     const dir = fs.opendirSync(tmpCardsDir);
     let dirent
     while ((dirent = dir.readSync()) !== null) {
