@@ -38,7 +38,7 @@ jobs:
         GURU_USER_EMAIL:  '${{ secrets.GURU_USER_EMAIL }}'
         GURU_USER_TOKEN:  '${{ secrets.GURU_USER_TOKEN }}'
         GURU_COLLECTION_ID: '********-****-****-****-************'
-        GURU_CARD_FOOTER: 'To edit this card, visit https://github.com/${{ github.repository }}"';
+        GURU_CARD_FOOTER: 'To edit this card, visit https://github.com/${{ github.repository }}"'
 ```
 
 Set GURU_COLLECTION_ID to the `id` of the collection you wish to update (you can get it from the [collections API](https://api.getguru.com/api/v1/collections)).
