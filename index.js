@@ -65,8 +65,7 @@ function copyCardData(tmpCardsDir) {
         tmpfileBase+=`_`;
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
-      if(!fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`)) {
-      };
+      fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
       let cardConfig = cardConfigs[cardFilename];
       if (!cardConfig.ExternalId) {
         cardConfig.ExternalId = `${process.env.GITHUB_REPOSITORY}/${cardFilename}`
@@ -83,6 +82,17 @@ function copyCardData(tmpCardsDir) {
   } else {
     console.log(`Copying ${process.env.GURU_CARD_DIR} to ${tmpCardsDir}`);
     fs.copySync(process.env.GURU_CARD_DIR, tmpCardsDir);
+  }
+  if (process.env.GURU_CARD_FOOTER) {
+    let cardFooter = '\n---\n'+process.env.GURU_CARD_FOOTER;
+    const dir = fs.opendirSync(tmpCardsDir);
+    let dirent
+    while ((dirent = dir.readSync()) !== null) {
+      if (dirent.name.endsWith('.md')) {
+        fs.appendFileSync(`${tmpCardsDir}/${dirent.name}`, cardFooter);
+      }
+    }
+    dir.closeSync();
   }
 }
 
@@ -160,6 +170,7 @@ function processExternalCollection(auth) {
   fs.mkdirSync(tmpBoardGroupsDir);
   //populate collection, card, board, boardgorup, resources
   copyCollectionData(tmpdir.name);
+  console.log(`process.env.GURU_CARD_FOOTER: ${process.env.GURU_CARD_FOOTER}`)
   copyCardData(tmpCardsDir);
   let cardFileList = fs.readdirSync(tmpCardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
   copyBoardData(tmpBoardsDir, cardFileList);
