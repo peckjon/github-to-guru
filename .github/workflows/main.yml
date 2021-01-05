@@ -20,3 +20,4 @@ jobs:
         GURU_CARD_YAML: 'sample-config/cards.yaml'
         GURU_BOARD_YAML: 'sample-config/boards.yaml'
         GURU_BOARDGROUP_YAML: 'sample-config/boardgroups.yaml'
+        GURU_RESOURCES_DIR: 'resources'
