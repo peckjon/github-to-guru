@@ -83,6 +83,24 @@ function copyCardData(tmpCardsDir) {
     console.log(`Copying ${process.env.GURU_CARD_DIR} to ${tmpCardsDir}`);
     fs.copySync(process.env.GURU_CARD_DIR, tmpCardsDir);
   }
+  if (process.env.GURU_RESOURCES_DIR) {
+    console.log(`Updating relative links to resources in ${process.env.GURU_RESOURCES_DIR}`);
+    const resourcesregex = new RegExp(`(\.\.\/)+${process.env.GURU_RESOURCES_DIR}\/`);
+    console.log(resourcesregex);
+    const dir = fs.opendirSync(tmpCardsDir);
+    let dirent
+    while ((dirent = dir.readSync()) !== null) {
+      if (dirent.name.endsWith('.md')) {
+        let olds = fs.readFileSync(`${tmpCardsDir}/${dirent.name}`, 'utf8');
+        let news = olds.replace(resourcesregex,'resources/');
+        if (olds!=news) {
+          console.log(`Updated ${dirent.name}`);
+          fs.writeFileSync(`${tmpCardsDir}/${dirent.name}`, news);
+        }
+      }
+    }
+    dir.closeSync();
+  }
   if (process.env.GURU_CARD_FOOTER) {
     let cardFooter = `\n---\n${process.env.GURU_CARD_FOOTER}\n`;
     console.log(`Adding card footer: ${cardFooter}`);
@@ -194,7 +212,7 @@ function processStandardCollection(auth) {
         auth,
         process.env.GURU_COLLECTION_ID,
         cardConfigs[cardFilename].Title,
-        fs.readFileSync(cardFilename, "utf8")
+        fs.readFileSync(cardFilename, 'utf8')
       ).then(response => {
         console.log(`Created card for ${cardFilename}`);
       }).catch(error => {
