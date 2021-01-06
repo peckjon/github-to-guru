@@ -95,7 +95,11 @@ BoardGroup2:
   - board2
   - board3
 ```
-- `GURU_RESOURCES_DIR`: the path, in your repo, of a directory whose files should be added as [resources](https://developer.getguru.com/docs/guru-sync-manual-api#resources)
+- `GURU_RESOURCES_DIR`: the path, in your repo, of a directory whose files should be added as [resources](https://developer.getguru.com/docs/guru-sync-manual-api#resources). All images, PDFs, etc should be placed here, and your markdown files should use _**relative**_ links to reference them. For example, if `GURU_RESOURCES_DIR: 'SomePath/Assets'`, then a markdown file inside the folder `SomePath/SomeOtherFolder` might contain:
+```
+Here is a PDF link: [somedoc.pdf](../Assets/somedoc.pdf)
+Here is a PDF embed: <iframe src="../Assets/somedoc.pdf"></iframe>
+```
 
 **An Important Note on Board YAML files:**
 
