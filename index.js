@@ -111,7 +111,6 @@ function copyCardData(tmpCardsDir) {
     }
     dir.closeSync();
   }
-  process.exit();
   if (process.env.GURU_CARD_FOOTER) {
     const cardFooter = `\n---\n${process.env.GURU_CARD_FOOTER}\n`;
     console.log(`Adding card footer: ${cardFooter}`);
