@@ -85,14 +85,24 @@ function copyCardData(tmpCardsDir) {
   }
   if (process.env.GURU_RESOURCES_DIR) {
     console.log(`Updating relative links to files in GURU_RESOURCES_DIR "${process.env.GURU_RESOURCES_DIR}"`);
-    const htmlLinkMatch = new RegExp(`(<[^>]* (href|src)=("|'))(\\.\\.\\/)*${process.env.GURU_RESOURCES_DIR}(\\/(.*)(\\3))`);
-    const mdLinkMatch = new RegExp(`(\\[(.+)\\]\\((..\\/)*)${process.env.GURU_RESOURCES_DIR}(\\/([^"')]+)(\\"(.+)\\")?\\))`);
+    let resources_dir=process.env.GURU_RESOURCES_DIR.replace(/\/+$/, '').replace(/^\/+/, '');
+    resources_dir_split=resources_dir.split('/');
+    const htmlLinkMatches = [];
+    const mdLinkMatches = [];
+    while(resources_dir_split.length) {
+      resources_dir=resources_dir_split.join('/');
+      htmlLinkMatches.push(new RegExp(`(<[^>]* (href|src)=("|'))(\\.\\.\\/)*${resources_dir}(\\/(.*)(\\3))`));
+      mdLinkMatches.push(new RegExp(`(\\[(.+)\\]\\()(..\\/)*${resources_dir}(\\/([^"')]+)(\\"(.+)\\")?\\))`));
+      resources_dir_split.shift();
+    }
     const dir = fs.opendirSync(tmpCardsDir);
     let dirent
     while ((dirent = dir.readSync()) !== null) {
       if (dirent.name.endsWith('.md')) {
         const olds = fs.readFileSync(`${tmpCardsDir}/${dirent.name}`, 'utf8');
-        let news = olds.replace(htmlLinkMatch,'$1resources$5').replace(mdLinkMatch,'$1resources$4');
+        let news = `${olds}`;
+        htmlLinkMatches.forEach(rx => news = news.replace(rx,'$1resources$5'));
+        mdLinkMatches.forEach(rx => news = news.replace(rx,'$1resources$4'));
         if (olds!=news) {
           console.log(` - Updated ${tmpCardsDir}/${dirent.name}`);
           fs.writeFileSync(`${tmpCardsDir}/${dirent.name}`, news);
@@ -101,6 +111,7 @@ function copyCardData(tmpCardsDir) {
     }
     dir.closeSync();
   }
+  process.exit();
   if (process.env.GURU_CARD_FOOTER) {
     const cardFooter = `\n---\n${process.env.GURU_CARD_FOOTER}\n`;
     console.log(`Adding card footer: ${cardFooter}`);
