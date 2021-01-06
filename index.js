@@ -25,11 +25,11 @@ async function apiSendSynchedCollection(sourceDir, auth, collectionId) {
 
 async function apiSendStandardCard(auth, collectionId, title, content) {
   console.log(`creating card in ${collectionId}: ${title}`)
-  let headers = {
+  const headers = {
     auth: auth,
     'content-type': `application/json`
   };
-  let data = {
+  const data = {
     preferredPhrase: title,
     content: content,
     htmlContent: false,
@@ -53,27 +53,27 @@ function copyCollectionData(targetDir) {
 function copyCardData(tmpCardsDir) {
   console.log(`\n--- PROCESSING CARD DATA ---`);
   if(process.env.GURU_CARD_YAML) {
-    let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
+    const cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     console.log(yaml.stringify(cardConfigs))
     for (let cardFilename in cardConfigs) try {
       if(!fs.existsSync(cardFilename)) {
         core.setFailed(`Cannot find file specified in ${process.env.GURU_CARD_YAML}: ${cardFilename}`);
         return;
       };
-      let tmpfileBase=cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
+      const tmpfileBase=cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
       while(fs.existsSync(`${tmpCardsDir}/${tmpfileBase}.yaml`)) {
         tmpfileBase+=`_`;
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
       fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
-      let cardConfig = cardConfigs[cardFilename];
+      const cardConfig = cardConfigs[cardFilename];
       if (!cardConfig.ExternalId) {
         cardConfig.ExternalId = `${process.env.GITHUB_REPOSITORY}/${cardFilename}`
       }
       if (!cardConfig.ExternalUrl) {
         cardConfig.ExternalUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/blob/master/${cardFilename}`
       }
-      let cardYaml=yaml.stringify(cardConfig);
+      const cardYaml=yaml.stringify(cardConfig);
       fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.yaml`, cardYaml);
     } catch (error) {
       core.setFailed(`Unable to prepare tempfiles: ${error.message}`);
@@ -84,17 +84,17 @@ function copyCardData(tmpCardsDir) {
     fs.copySync(process.env.GURU_CARD_DIR, tmpCardsDir);
   }
   if (process.env.GURU_RESOURCES_DIR) {
-    console.log(`Updating relative links to resources in ${process.env.GURU_RESOURCES_DIR}`);
-    const resourcesregex = new RegExp(`(\.\.\/)+${process.env.GURU_RESOURCES_DIR}\/`);
-    console.log(resourcesregex);
+    console.log(`Updating relative links to files in GURU_RESOURCES_DIR "${process.env.GURU_RESOURCES_DIR}"`);
+    const htmlLinkMatch = new RegExp(`(<[^>]* (href|src)=("|'))(\\.\\.\\/)*${process.env.GURU_RESOURCES_DIR}(\\/(.*)(\\3))`);
+    const mdLinkMatch = new RegExp(`(\\[(.+)\\]\\((..\\/)*)${process.env.GURU_RESOURCES_DIR}(\\/([^"')]+)(\\"(.+)\\")?\\))`);
     const dir = fs.opendirSync(tmpCardsDir);
     let dirent
     while ((dirent = dir.readSync()) !== null) {
       if (dirent.name.endsWith('.md')) {
-        let olds = fs.readFileSync(`${tmpCardsDir}/${dirent.name}`, 'utf8');
-        let news = olds.replace(resourcesregex,'resources/');
+        const olds = fs.readFileSync(`${tmpCardsDir}/${dirent.name}`, 'utf8');
+        let news = olds.replace(htmlLinkMatch,'$1resources$5').replace(mdLinkMatch,'$1resources$4');
         if (olds!=news) {
-          console.log(`Updated ${dirent.name}`);
+          console.log(` - Updated ${tmpCardsDir}/${dirent.name}`);
           fs.writeFileSync(`${tmpCardsDir}/${dirent.name}`, news);
         }
       }
@@ -102,7 +102,7 @@ function copyCardData(tmpCardsDir) {
     dir.closeSync();
   }
   if (process.env.GURU_CARD_FOOTER) {
-    let cardFooter = `\n---\n${process.env.GURU_CARD_FOOTER}\n`;
+    const cardFooter = `\n---\n${process.env.GURU_CARD_FOOTER}\n`;
     console.log(`Adding card footer: ${cardFooter}`);
     const dir = fs.opendirSync(tmpCardsDir);
     let dirent
@@ -118,7 +118,7 @@ function copyCardData(tmpCardsDir) {
 function copyBoardData(tmpBoardsDir, cardFileList) {
   console.log(`\n--- PROCESSING BOARD DATA---`);
   if (process.env.GURU_BOARD_YAML) {
-    let boardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARD_YAML, 'utf8'));
+    const boardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARD_YAML, 'utf8'));
     console.log(yaml.stringify(boardConfigs))
     let i=1;
     for (let boardName in boardConfigs) {
@@ -144,7 +144,7 @@ function copyBoardData(tmpBoardsDir, cardFileList) {
 function copyBoardGroupData(tmpBoardGroupsDir, boardFileList) {
   console.log(`\n--- PROCESSING BOARDGROUP DATA ---`);
   if (process.env.GURU_BOARDGROUP_YAML) {
-    let boardGroupConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARDGROUP_YAML, 'utf8'));
+    const boardGroupConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARDGROUP_YAML, 'utf8'));
     console.log(yaml.stringify(boardGroupConfigs));
     let i=1;
     for (let boardGroupName in boardGroupConfigs) {
@@ -155,7 +155,7 @@ function copyBoardGroupData(tmpBoardGroupsDir, boardFileList) {
           return;
         }
       }
-      let targetFile = `${tmpBoardGroupsDir}/board-group${i++}.yaml`
+      const targetFile = `${tmpBoardGroupsDir}/board-group${i++}.yaml`
       console.log(`Writing ${boardGroupName} to ${targetFile}`);
       let boardGroupYaml=yaml.stringify(boardGroupConfigs[boardGroupName]);
       fs.writeFileSync(`${targetFile}`, boardGroupYaml);
@@ -177,22 +177,22 @@ function copyResources(tmpResourcesDir) {
 
 function processExternalCollection(auth) {
   //create tmp dirs to hold zipfile data
-  let tmpdir = tmp.dirSync();
+  const tmpdir = tmp.dirSync();
   console.log('tmpdir: ', tmpdir.name);
-  let tmpCardsDir = `${tmpdir.name}/cards`;
+  const tmpCardsDir = `${tmpdir.name}/cards`;
   fs.mkdirSync(tmpCardsDir);
-  let tmpBoardsDir = `${tmpdir.name}/boards`;
+  const tmpBoardsDir = `${tmpdir.name}/boards`;
   fs.mkdirSync(tmpBoardsDir);
-  let tmpResourcesDir = `${tmpdir.name}/resources`;
+  const tmpResourcesDir = `${tmpdir.name}/resources`;
   fs.mkdirSync(tmpResourcesDir);
-  let tmpBoardGroupsDir = `${tmpdir.name}/board-groups`;
+  const tmpBoardGroupsDir = `${tmpdir.name}/board-groups`;
   fs.mkdirSync(tmpBoardGroupsDir);
   //populate collection, card, board, boardgorup, resources
   copyCollectionData(tmpdir.name);
   copyCardData(tmpCardsDir);
-  let cardFileList = fs.readdirSync(tmpCardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
+  const cardFileList = fs.readdirSync(tmpCardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
   copyBoardData(tmpBoardsDir, cardFileList);
-  let boardFileList = fs.readdirSync(tmpBoardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
+  const boardFileList = fs.readdirSync(tmpBoardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
   copyBoardGroupData(tmpBoardGroupsDir, boardFileList);
   copyResources(tmpResourcesDir);
   //zip and send to Guru
