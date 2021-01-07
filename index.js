@@ -67,7 +67,7 @@ function copyCardData(tmpCardsDir) {
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
       fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
-      fs.appendFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, cardFooter.replace('__CARDPATH__',cardFilename));
+      fs.appendFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename)));
       const cardConfig = cardConfigs[cardFilename];
       if (!cardConfig.ExternalId) {
         cardConfig.ExternalId = `${process.env.GITHUB_REPOSITORY}/${cardFilename}`
@@ -89,7 +89,7 @@ function copyCardData(tmpCardsDir) {
       let dirent
       while ((dirent = dir.readSync()) !== null) {
         if (dirent.name.endsWith('.md')) {
-          fs.appendFileSync(`${tmpCardsDir}/${dirent.name}`, cardFooter);
+          fs.appendFileSync(`${tmpCardsDir}/${dirent.name}`, cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename)));
         }
       }
       dir.closeSync();
