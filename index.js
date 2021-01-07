@@ -89,7 +89,7 @@ function copyCardData(tmpCardsDir) {
       let dirent
       while ((dirent = dir.readSync()) !== null) {
         if (dirent.name.endsWith('.md')) {
-          fs.appendFileSync(`${tmpCardsDir}/${dirent.name}`, cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename)));
+          fs.appendFileSync(`${tmpCardsDir}/${dirent.name}`, cardFooter.replace('__CARDPATH__',encodeURIComponent(dirent.name)));
         }
       }
       dir.closeSync();
