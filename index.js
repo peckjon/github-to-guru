@@ -88,7 +88,7 @@ function copyCardData(tmpCardsDir) {
       const dir = fs.opendirSync(tmpCardsDir);
       let dirent
       while ((dirent = dir.readSync()) !== null) {
-        if (dirent.name.endsWith('.md')) {
+        if (dirent.name.endsWith('.md')||dirent.name.endsWith('.html')) {
           fs.appendFileSync(`${tmpCardsDir}/${dirent.name}`, cardFooter.replace('__CARDPATH__',encodeURIComponent(dirent.name)));
         }
       }
@@ -110,7 +110,7 @@ function copyCardData(tmpCardsDir) {
     const dir = fs.opendirSync(tmpCardsDir);
     let dirent
     while ((dirent = dir.readSync()) !== null) {
-      if (dirent.name.endsWith('.md')) {
+      if (dirent.name.endsWith('.md')||dirent.name.endsWith('.html')) {
         const olds = fs.readFileSync(`${tmpCardsDir}/${dirent.name}`, 'utf8');
         let news = `${olds}`;
         htmlLinkMatches.forEach(rx => news = news.replace(rx,'$1resources$5'));
