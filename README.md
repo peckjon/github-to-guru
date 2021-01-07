@@ -43,7 +43,7 @@ jobs:
 
 Set GURU_COLLECTION_ID to the `id` of the collection you wish to update (you can get it from the [collections API](https://api.getguru.com/api/v1/collections)).
 
-GURU_CARD_FOOTER is optional; if used, it will add this text to the end of each Card (separated by a line `\n---\n`).
+GURU_CARD_FOOTER is optional; if used, it will add this text to the end of each Card (separated by a line `\n---\n`). Any instances of `__CARDPATH__` in the footer will be replaced with path to the card (relative to the ) ()
 
 Then, add one or more of the following to the `env`:
 

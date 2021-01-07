@@ -52,6 +52,7 @@ function copyCollectionData(targetDir) {
 
 function copyCardData(tmpCardsDir) {
   console.log(`\n--- PROCESSING CARD DATA ---`);
+  const cardFooter = process.env.GURU_CARD_FOOTER?`\n---\n${process.env.GURU_CARD_FOOTER}\n`:'';
   if(process.env.GURU_CARD_YAML) {
     const cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     console.log(yaml.stringify(cardConfigs))
@@ -66,6 +67,7 @@ function copyCardData(tmpCardsDir) {
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
       fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
+      fs.appendFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, cardFooter.replace('__CARDPATH__',cardFilename));
       const cardConfig = cardConfigs[cardFilename];
       if (!cardConfig.ExternalId) {
         cardConfig.ExternalId = `${process.env.GITHUB_REPOSITORY}/${cardFilename}`
@@ -82,6 +84,16 @@ function copyCardData(tmpCardsDir) {
   } else {
     console.log(`Copying ${process.env.GURU_CARD_DIR} to ${tmpCardsDir}`);
     fs.copySync(process.env.GURU_CARD_DIR, tmpCardsDir);
+    if (cardFooter) {
+      const dir = fs.opendirSync(tmpCardsDir);
+      let dirent
+      while ((dirent = dir.readSync()) !== null) {
+        if (dirent.name.endsWith('.md')) {
+          fs.appendFileSync(`${tmpCardsDir}/${dirent.name}`, cardFooter);
+        }
+      }
+      dir.closeSync();
+    }
   }
   if (process.env.GURU_RESOURCES_DIR) {
     console.log(`Updating relative links to files in GURU_RESOURCES_DIR "${process.env.GURU_RESOURCES_DIR}"`);
@@ -107,18 +119,6 @@ function copyCardData(tmpCardsDir) {
           console.log(` - Updated ${tmpCardsDir}/${dirent.name}`);
           fs.writeFileSync(`${tmpCardsDir}/${dirent.name}`, news);
         }
-      }
-    }
-    dir.closeSync();
-  }
-  if (process.env.GURU_CARD_FOOTER) {
-    const cardFooter = `\n---\n${process.env.GURU_CARD_FOOTER}\n`;
-    console.log(`Adding card footer: ${cardFooter}`);
-    const dir = fs.opendirSync(tmpCardsDir);
-    let dirent
-    while ((dirent = dir.readSync()) !== null) {
-      if (dirent.name.endsWith('.md')) {
-        fs.appendFileSync(`${tmpCardsDir}/${dirent.name}`, cardFooter);
       }
     }
     dir.closeSync();
