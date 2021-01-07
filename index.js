@@ -118,7 +118,7 @@ function copyCardData(tmpCardsDir) {
     let dirent
     while ((dirent = dir.readSync()) !== null) {
       if (dirent.name.endsWith('.md')) {
-        fs.appendFileSync(`${tmpCardsDir}/tree/master/${dirent.name}`, cardFooter);
+        fs.appendFileSync(`${tmpCardsDir}/${dirent.name}`, cardFooter);
       }
     }
     dir.closeSync();
