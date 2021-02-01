@@ -130,7 +130,6 @@ function copyBoardData(tmpBoardsDir, cardFileList) {
   if (process.env.GURU_BOARD_YAML) {
     const boardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARD_YAML, 'utf8'));
     console.log(yaml.stringify(boardConfigs))
-    let i=1;
     for (let boardName in boardConfigs) {
       for (let item in boardConfigs[boardName]['Items']) {
         let cardYamlFile = boardConfigs[boardName]['Items'][item].ID+'.yaml';
@@ -139,7 +138,8 @@ function copyBoardData(tmpBoardsDir, cardFileList) {
           return;
         }
       }
-      let targetFile = `${tmpBoardsDir}/board${i++}.yaml`
+      let boardNameSafe = boardName.replace(/[^a-zA-Z0-9]/gi, '_')
+      let targetFile = `${tmpBoardsDir}/${boardNameSafe}.yaml`
       console.log(`Writing ${boardName} to ${targetFile}`);
       let boardYaml=yaml.stringify(boardConfigs[boardName]);
       fs.writeFileSync(`${targetFile}`, boardYaml);
@@ -156,7 +156,6 @@ function copyBoardGroupData(tmpBoardGroupsDir, boardFileList) {
   if (process.env.GURU_BOARDGROUP_YAML) {
     const boardGroupConfigs = yaml.parse(fs.readFileSync(process.env.GURU_BOARDGROUP_YAML, 'utf8'));
     console.log(yaml.stringify(boardGroupConfigs));
-    let i=1;
     for (let boardGroupName in boardGroupConfigs) {
       for (let item in boardGroupConfigs[boardGroupName]['Boards']) {
         let boardYamlFile = boardGroupConfigs[boardGroupName]['Boards'][item]+'.yaml';
@@ -165,7 +164,8 @@ function copyBoardGroupData(tmpBoardGroupsDir, boardFileList) {
           return;
         }
       }
-      const targetFile = `${tmpBoardGroupsDir}/board-group${i++}.yaml`
+      let boardGroupNameSafe = boardGroupName.replace(/[^a-zA-Z0-9]/gi, '_')
+      const targetFile = `${tmpBoardGroupsDir}/${boardGroupNameSafe}.yaml`
       console.log(`Writing ${boardGroupName} to ${targetFile}`);
       let boardGroupYaml=yaml.stringify(boardGroupConfigs[boardGroupName]);
       fs.writeFileSync(`${targetFile}`, boardGroupYaml);
