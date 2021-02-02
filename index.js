@@ -132,10 +132,18 @@ function copyBoardData(tmpBoardsDir, cardFileList) {
     console.log(yaml.stringify(boardConfigs))
     for (let boardName in boardConfigs) {
       for (let item in boardConfigs[boardName]['Items']) {
-        let cardYamlFile = boardConfigs[boardName]['Items'][item].ID+'.yaml';
-        if (!cardFileList.includes(cardYamlFile)) {
-          core.setFailed(`Error in board ${boardName}: cannot find ${cardYamlFile} in cards [${cardFileList}]`);
-          return;
+        if(boardConfigs[boardName]['Items'][item].ID) {
+          let cardYamlFile = boardConfigs[boardName]['Items'][item].ID+'.yaml';
+          if (!cardFileList.includes(cardYamlFile)) {
+            core.setFailed(`Error in board ${boardName}: cannot find ${cardYamlFile} in cards [${cardFileList}]`);
+            return;
+          }
+        } else for (let section_item in boardConfigs[boardName]['Items'][item]['Items']) {
+          let cardYamlFile = boardConfigs[boardName]['Items'][item]['Items'][section_item].ID+'.yaml';
+          if (!cardFileList.includes(cardYamlFile)) {
+            core.setFailed(`Error in board ${boardName}: cannot find ${cardYamlFile} in cards [${cardFileList}]`);
+            return;
+          }
         }
       }
       let boardNameSafe = boardName.replace(/[^a-zA-Z0-9]/gi, '_')
