@@ -2,6 +2,6 @@ BoardGroup1:
   Title: GitHub to Guru Content Migration
   Description: Testing GitHub-to-Guru Board Groups
   Boards:
-  - board1
+  - Board1
   ExternalId: github-to-guru-boardgroup
   ExternalUrl: https://github.com/peckjon/github-to-guru
