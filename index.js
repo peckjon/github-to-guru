@@ -38,15 +38,47 @@ async function apiSendStandardCard(auth, collectionId, title, content) {
   return axios.post(`https://api.getguru.com/api/v1/facts/extended`, data, headers)
 }
 
-function copyCollectionData(targetDir) {
+function copyCollectionData(targetDir, tmpCardsDir) {
   console.log(`\n--- PROCESSING COLLECTION DATA---`);
+  var allTags=[];
+  var files=fs.readdirSync(tmpCardsDir);
+  for(var i=0;i<files.length;i++){
+      var filename=`${tmpCardsDir}/${files[i]}`;
+      if(filename.endsWith('.yaml')) {
+        var cardYaml = yaml.parse(fs.readFileSync(filename, 'utf8'));
+        for(tag in cardYaml['Tags']) {
+          if(allTags.indexOf(cardYaml['Tags'][tag])<0) {
+            allTags.push(cardYaml['Tags'][tag]);
+          }
+        }
+      }
+  };
   if (process.env.GURU_COLLECTION_YAML) {
+    if(allTags.length) {
+      var collectionYaml = yaml.parse(fs.readFileSync(process.env.GURU_COLLECTION_YAML, 'utf8'));
+      if(!(collectionYaml&&collectionYaml['Tags'])) {
+        core.setFailed(`No tags are specified in collection.yaml, but tags are present in cards`);
+      }
+      else for(tag in allTags) {
+        if((!collectionYaml['Tags']) || collectionYaml['Tags'].indexOf(allTags[tag])<0) {
+          core.setFailed(`Tag is specified in a card but not present in collection.yaml: ${allTags[tag]}`);
+        }
+      }
+    }
     console.log(`Copying ${process.env.GURU_COLLECTION_YAML} to ${targetDir}/collection.yaml`);
     fs.copySync(process.env.GURU_COLLECTION_YAML, `${targetDir}/collection.yaml`);
   }
   else {
-    console.log(`Writing '---' to ${targetDir}/collection.yaml:`);
-    fs.writeFileSync(`${targetDir}/collection.yaml`, `--- ~\n`);
+    collectionYaml = `--- ~\n`;
+    if(allTags.length) {
+      collectionYaml = `Tags:\n`
+      for(tag in allTags) {
+        collectionYaml += `  - "${allTags[tag]}"\n`
+      }
+      collectionYaml += `\n`
+    }
+    console.log(`Writing ${targetDir}/collection.yaml:`);
+    fs.writeFileSync(`${targetDir}/collection.yaml`, collectionYaml);
   }
 }
 
@@ -205,13 +237,13 @@ function processExternalCollection(auth) {
   fs.mkdirSync(tmpResourcesDir);
   const tmpBoardGroupsDir = `${tmpdir.name}/board-groups`;
   fs.mkdirSync(tmpBoardGroupsDir);
-  //populate collection, card, board, boardgorup, resources
-  copyCollectionData(tmpdir.name);
+  //populate card, board, boardgroup, collection, resources
   copyCardData(tmpCardsDir);
   const cardFileList = fs.readdirSync(tmpCardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
   copyBoardData(tmpBoardsDir, cardFileList);
   const boardFileList = fs.readdirSync(tmpBoardsDir, {withFileTypes: true}).filter(item => !item.isDirectory()).map(item => item.name);
   copyBoardGroupData(tmpBoardGroupsDir, boardFileList);
+  copyCollectionData(tmpdir.name, tmpCardsDir);
   copyResources(tmpResourcesDir);
   //zip and send to Guru
   apiSendSynchedCollection(tmpdir.name,auth,process.env.GURU_COLLECTION_ID).catch(error => {
