@@ -136,7 +136,7 @@ function copyCardData(tmpCardsDir) {
     while(resources_dir_split.length) {
       resources_dir=resources_dir_split.join('/');
       htmlLinkMatches.push(new RegExp(`(<[^>]* (href|src)=("|'))(\\.\\.\\/)*${resources_dir}(\\/(.*)(\\3))`,'g'));
-      mdLinkMatches.push(new RegExp(`(\\[(.+)\\]\\()(\\.\\.\\/)*${resources_dir}(\\/([^"')]+)(\\"(.+)\\")?\\))`,'g'));
+      mdLinkMatches.push(new RegExp(`(\\[(.?)\\]\\()(\\.\\.\\/)*${resources_dir}(\\/([^"')]+)(\\"(.+)\\")?\\))`,'g'));
       resources_dir_split.shift();
     }
     const dir = fs.opendirSync(tmpCardsDir);
