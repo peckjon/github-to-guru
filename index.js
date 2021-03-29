@@ -11,6 +11,17 @@ async function getCollection(auth, collectionId) {
   return axios.get(`https://api.getguru.com/api/v1/collections/`+collectionId, {auth: auth})
 }
 
+const jobIdToEnv = {};
+jobIdToEnv.listeners = {
+  stdout: (data) => {
+    process.env.GITHUB_ENV+=
+    myOutput += data.toString();
+  },
+  stderr: (data) => {
+    myError += data.toString();
+  }
+};
+
 async function apiSendSynchedCollection(sourceDir, auth, collectionId) {
   console.log(`\n--- SENDING ZIPFILE ---`);
   let options = {};
@@ -19,7 +30,10 @@ async function apiSendSynchedCollection(sourceDir, auth, collectionId) {
   if (process.env.DEBUG) {
     console.log(`DEBUG mode: not deploying ${sourceDir}/guru_collection.zip to https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId}`);
   } else {
-    await exec.exec(`curl -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@${sourceDir}/guru_collection.zip" -D -`);
+    await exec.exec(`
+    export GURU_SYNC_RESPONSE=$(curl -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@${sourceDir}/guru_collection.zip" -D -)
+    echo "GURU_JOBID=$GURU_SYNC_RESPONSE" >> $GITHUB_ENV
+    `);
   }
 }
 
