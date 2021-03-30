@@ -22,8 +22,10 @@ async function apiSendSynchedCollection(sourceDir, auth, collectionId) {
     let curl_cmd = `curl --silent -u ${auth.username}:${auth.password} https://api.getguru.com/app/contentsyncupload?collectionId=${collectionId} -F "file=@${sourceDir}/guru_collection.zip" -D -`
     fs.writeFile('runguru.sh',`#!/bin/sh
     GURU_SYNC_RESPONSE=$(`+curl_cmd+`)
+    echo $GURU_SYNC_RESPONSE
     echo "GURU_SYNC_RESPONSE=$GURU_SYNC_RESPONSE" >> $GITHUB_ENV
     `)
+    await exec.exec(`cat runguru.sh`);
     await exec.exec(`chmod u+x runguru.sh`);
     await exec.exec(`sh runguru.sh`);
   }
