@@ -23,7 +23,7 @@ async function apiSendSynchedCollection(sourceDir, auth, collectionId) {
     fs.writeFile('runguru.sh',`#!/bin/sh
     GURU_SYNC_RESPONSE=$(`+curl_cmd+`)
     echo $GURU_SYNC_RESPONSE
-    echo "GURU_SYNC_RESPONSE=$GURU_SYNC_RESPONSE" >> $GITHUB_ENV
+    echo "GURU_SYNC_RESPONSE=\"$GURU_SYNC_RESPONSE\"" >> $GITHUB_ENV
     `)
     await exec.exec(`chmod u+x runguru.sh`);
     await exec.exec(`sh runguru.sh`);
