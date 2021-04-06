@@ -5,6 +5,10 @@ const yaml = require('yaml')
 const core = require(`@actions/core`);
 const exec = require('@actions/exec');
 const github = require(`@actions/github`);
+const markdownit = require('markdown-it')({
+  html: true,
+  linkify: true
+});
 
 async function getCollection(auth, collectionId) {
   console.log(`collection: ${collectionId}`)
@@ -105,8 +109,15 @@ function copyCardData(tmpCardsDir) {
         tmpfileBase+=`_`;
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
-      fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
-      fs.appendFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename)));
+      if(process.env.GURU_CONVERT_MARKDOWN) {
+        var mdcontent = rs.readFileSync(cardFilename);
+        mdcontent += cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename));
+        fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.htm`, mdcontent)
+      } else {
+        fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
+        fs.appendFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename)));
+
+      }
       const cardConfig = cardConfigs[cardFilename];
       if (!cardConfig.ExternalId) {
         cardConfig.ExternalId = `${process.env.GITHUB_REPOSITORY}/${cardFilename}`
@@ -261,6 +272,9 @@ function processExternalCollection(auth) {
 function processStandardCollection(auth) {
   if(process.env.GURU_CARD_DIR) {
     core.setFailed("GURU_CARD_DIR is only supported for EXTERNAL collections: https://developer.getguru.com/docs/guru-sync-manual-api");
+    return;
+  } else if(process.env.GURU_CONVERT_MARKDOWN) {
+    core.setFailed("GURU_CONVERT_MARKDOWN is only supported for EXTERNAL collections: https://developer.getguru.com/docs/guru-sync-manual-api");
     return;
   } else {
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
