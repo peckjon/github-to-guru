@@ -109,7 +109,7 @@ function copyCardData(tmpCardsDir) {
         tmpfileBase+=`_`;
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
-      if(process.env.GURU_CONVERT_MARKDOWN) {
+      if(process.env.GURU_CONVERT_MARKDOWN>0) {
         var mdcontent = fs.readFileSync(cardFilename);
         mdcontent += cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename));
         fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.html`, markdownit.render(mdcontent))
@@ -273,7 +273,7 @@ function processStandardCollection(auth) {
   if(process.env.GURU_CARD_DIR) {
     core.setFailed("GURU_CARD_DIR is only supported for EXTERNAL collections: https://developer.getguru.com/docs/guru-sync-manual-api");
     return;
-  } else if(process.env.GURU_CONVERT_MARKDOWN) {
+  } else if(process.env.GURU_CONVERT_MARKDOWN>0) {
     core.setFailed("GURU_CONVERT_MARKDOWN is only supported for EXTERNAL collections: https://developer.getguru.com/docs/guru-sync-manual-api");
     return;
   } else {
