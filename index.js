@@ -110,9 +110,9 @@ function copyCardData(tmpCardsDir) {
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
       if(process.env.GURU_CONVERT_MARKDOWN) {
-        var mdcontent = rs.readFileSync(cardFilename);
+        var mdcontent = fs.readFileSync(cardFilename);
         mdcontent += cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename));
-        fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.htm`, mdcontent)
+        fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.htm`, markdownit.render(mdcontent))
       } else {
         fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
         fs.appendFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename)));
