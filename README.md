@@ -110,7 +110,7 @@ Here is a PDF embed: <iframe src="../Assets/somedoc.pdf"></iframe>
 - You cannot use both the `_DIR` and the `_YAML` way of configuring the same entity type. E.g., if you set both `GURU_CARD_DIR` and `GURU_CARD_YAML`, then `GURU_CARD_DIR` will be ignored.
 - Although the ([Guru documentation](https://developer.getguru.com/docs/guru-sync-manual-api)) requires an ExternalId and ExternalUrl for most items, you can choose to omit them here for **cards** only; the action can auto-generate these properties for you.
 - "Synchronized" collections take a few minutes to finish; you can check their status at `https://api.getguru.com/api/v1/import/JOBID/status`, where JOBID is the "jobId" shown at the end of the `peckjon/github-to-guru@master` step in your workflow's execution log.
-- Guru automatically converts Markdown to HTML, but there are some [known issues](https://github.com/peckjon/github-to-guru/issues/7) with the conversion. To preconvert Markdown files using [markdown-it](https://www.npmjs.com/package/markdown-it), set the env`GURU_CONVERT_MARKDOWN` to `true` in your workflow.
+- Guru automatically converts Markdown to HTML, but there are some [known issues](https://github.com/peckjon/github-to-guru/issues/7) with the conversion. To preconvert Markdown files using [markdown-it](https://www.npmjs.com/package/markdown-it), set the env `GURU_CONVERT_MARKDOWN` to `true` in your workflow.
 
 ### Appendix: creating a synchronized collection
 
