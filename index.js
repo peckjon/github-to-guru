@@ -116,6 +116,7 @@ function copyCardData(tmpCardsDir) {
       } else {
         if(process.env.GURU_WRAP_MARKDOWN>0) {
           // https://app.getguru.com/card/ceE6gnEi
+          console.log("Wrap MD content in DIV as per app.getguru.com/card/ceE6gnEi");
           mdcontent = `<div class="ghq-card-content__markdown" data-ghq-card-content-type="MARKDOWN" data-ghq-card-content-markdown-content="${encodeURIComponent(mdcontent)}"></div>`;
         }
         fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, mdcontent);
