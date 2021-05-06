@@ -109,14 +109,16 @@ function copyCardData(tmpCardsDir) {
         tmpfileBase+=`_`;
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
+      var mdcontent = fs.readFileSync(cardFilename);
+      mdcontent += cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename));
       if(process.env.GURU_CONVERT_MARKDOWN>0) {
-        var mdcontent = fs.readFileSync(cardFilename);
-        mdcontent += cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename));
-        fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.html`, markdownit.render(mdcontent))
+        fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.html`, markdownit.render(mdcontent));
       } else {
-        fs.copySync(cardFilename,`${tmpCardsDir}/${tmpfileBase}.md`);
-        fs.appendFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename)));
-
+        if(process.env.GURU_WRAP_MARKDOWN>0) {
+          // https://app.getguru.com/card/ceE6gnEi
+          mdcontent = `<div class="ghq-card-content__markdown" data-ghq-card-content-type="MARKDOWN" data-ghq-card-content-markdown-content="${encodeURIComponent(mdcontent)}"></div>`;
+        }
+        fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, mdcontent);
       }
       const cardConfig = cardConfigs[cardFilename];
       if (!cardConfig.ExternalId) {
