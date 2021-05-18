@@ -96,6 +96,7 @@ function copyCollectionData(targetDir, tmpCardsDir) {
 function copyCardData(tmpCardsDir) {
   console.log(`\n--- PROCESSING CARD DATA ---`);
   const cardFooter = process.env.GURU_CARD_FOOTER?`\n---\n${process.env.GURU_CARD_FOOTER}\n`:'';
+  const cardpathRegex = /__CARDPATH__/g;
   if(process.env.GURU_CARD_YAML) {
     const cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     console.log(yaml.stringify(cardConfigs))
@@ -110,7 +111,7 @@ function copyCardData(tmpCardsDir) {
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
       var mdcontent = fs.readFileSync(cardFilename);
-      mdcontent += cardFooter.replace('__CARDPATH__',encodeURIComponent(cardFilename));
+      mdcontent += cardFooter.replace(cardpathRegex,encodeURIComponent(cardFilename));
       if(process.env.GURU_CONVERT_MARKDOWN>0) {
         fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.html`, markdownit.render(mdcontent));
       } else {
