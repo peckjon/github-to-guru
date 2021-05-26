@@ -115,7 +115,11 @@ function copyCardData(tmpCardsDir) {
       if(process.env.GURU_CONVERT_MARKDOWN>0) {
         fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.html`, markdownit.render(mdcontent));
       } else {
-        mdcontent = `<div class="ghq-card-content__markdown" data-ghq-card-content-type="MARKDOWN" data-ghq-card-content-markdown-content="${encodeURIComponent(mdcontent)}"></div>`; // https://app.getguru.com/card/ceE6gnEi
+        if(process.env.GURU_WRAP_MARKDOWN>0) {
+          // https://app.getguru.com/card/ceE6gnEi
+          console.log("Wrap MD content in DIV as per app.getguru.com/card/ceE6gnEi");
+          mdcontent = `<div class="ghq-card-content__markdown" data-ghq-card-content-type="MARKDOWN" data-ghq-card-content-markdown-content="${encodeURIComponent(mdcontent)}"></div>`;
+        }
         fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, mdcontent);
       }
       const cardConfig = cardConfigs[cardFilename];
