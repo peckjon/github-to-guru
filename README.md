@@ -14,7 +14,7 @@ Since this is an action, you can build other logic on top, such as splitting up 
 
 ## Example usage
 
-1. Add a Secret named `GURU_USER_TOKEN` containing a [User Token for Guru](https://help.getguru.com/articles/XipkRKLi/Guru-API-Overview)
+1. Add a Secret named `GURU_USER_TOKEN` containing a [User Token for Guru](https://help.getguru.com/en/articles/4740119-how-to-obtain-your-api-credentials)
 
 2. Add a Secret named `GURU_USER_EMAIL` containing the email address for which you [created the User Token](https://app.getguru.com/settings/api-access)
 
@@ -41,7 +41,9 @@ jobs:
         GURU_CARD_FOOTER: 'To edit this card, visit https://github.com/${{ github.repository }}'
 ```
 
-Set GURU_COLLECTION_ID to the `id` of the collection you wish to update (you can get it from the [collections API](https://api.getguru.com/api/v1/collections)).
+Set GURU_COLLECTION_ID to the `id` of the collection you wish to update (you can get it from the [collections API](https://api.getguru.com/api/v1/collections)). 
+
+_**IMPORTANT NOTE:** If you are planning on creating a synchronized collection, you must first create the collection via the API (See Appendix on how to do this), and then retrieve the id from the response._
 
 GURU_CARD_FOOTER is optional; if used, it will add this text to the end of each Card (separated by a line `\n---\n`). Any instances of `__CARDPATH__` in the footer will be replaced with path to the card relative to the repo root. A suggested footer might be `[EDIT THIS CARD](https://github.com/${{ github.repository }}/tree/master/__CARDPATH__)`.
 
@@ -114,11 +116,13 @@ Here is a PDF embed: <iframe src="../Assets/somedoc.pdf"></iframe>
 
 ### Appendix: creating a synchronized collection
 
+_Important note: A synchronized collection **must** be created via the API._
+
 1. Get the ID of a User Group as per https://developer.getguru.com/reference#groups
-2. Make a POST to https://api.getguru.com/api/v1/collections of the form:
+2. Make a POST to https://api.getguru.com/api/v1/collections with Basic Auth using your Guru email and Guru API Token:
 ```
 {
-  "name": "My Synced Collection",
+  "name": "YOUR SYNCED COLLECTION NAME",
   "collectionType": "EXTERNAL",
   "description": "",
   "color": "#F44336",
