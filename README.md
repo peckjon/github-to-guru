@@ -107,6 +107,12 @@ Here is a PDF embed: <iframe src="../Assets/somedoc.pdf"></iframe>
 
 - The names of Cards are modified by this script: non-alphanumeric characters are replaced by underscores (`cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_')`). The Board YAML must use these modified names as the Card IDs (with no filetype suffix). For example, you have a markdown file `someDir/my very 1st Card!.md` and want to list this card on a Board, the Board YAML should have an Item `ID: "someDir/my_very__1_st_Card_"`.
 
+**Sample scripts::**
+
+If you wish to auto-generate the YAML config files, see [sample-scripts](./sample-scripts).
+
+Many thanks to @rwnfoo for her collaboration on this work!
+
 **Other Notes:**
 
 - You cannot use both the `_DIR` and the `_YAML` way of configuring the same entity type. E.g., if you set both `GURU_CARD_DIR` and `GURU_CARD_YAML`, then `GURU_CARD_DIR` will be ignored.
