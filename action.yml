@@ -8,5 +8,5 @@ outputs:
   created:
     description: 'number of cards created'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'index.js'
