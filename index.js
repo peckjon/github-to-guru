@@ -10,6 +10,8 @@ const markdownit = require('markdown-it')({
   linkify: true
 });
 
+const cardpathRegex = /__CARDPATH__/g;
+
 async function getCollection(auth, collectionId) {
   console.log(`collection: ${collectionId}`)
   return axios.get(`https://api.getguru.com/api/v1/collections/`+collectionId, {auth: auth})
@@ -96,7 +98,6 @@ function copyCollectionData(targetDir, tmpCardsDir) {
 function copyCardData(tmpCardsDir) {
   console.log(`\n--- PROCESSING CARD DATA ---`);
   const cardFooter = process.env.GURU_CARD_FOOTER?`\n---\n${process.env.GURU_CARD_FOOTER}\n`:'';
-  const cardpathRegex = /__CARDPATH__/g;
   if(process.env.GURU_CARD_YAML) {
     const cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     console.log(yaml.stringify(cardConfigs))
@@ -281,13 +282,16 @@ function processStandardCollection(auth) {
     core.setFailed("GURU_CONVERT_MARKDOWN is only supported for EXTERNAL collections: https://developer.getguru.com/docs/guru-sync-manual-api");
     return;
   } else {
+    const cardFooter = process.env.GURU_CARD_FOOTER?`\n---\n${process.env.GURU_CARD_FOOTER}\n`:'';
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     for (let cardFilename in cardConfigs) try {
+      const cardContent = fs.readFileSync(cardFilename, 'utf8');
+      cardContent += cardFooter.replace(cardpathRegex,encodeURIComponent(cardFilename));
       apiSendStandardCard(
         auth,
         process.env.GURU_COLLECTION_ID,
         cardConfigs[cardFilename].Title,
-        fs.readFileSync(cardFilename, 'utf8')
+        cardContent
       ).then(response => {
         console.log(`Created card for ${cardFilename}`);
       }).catch(error => {
