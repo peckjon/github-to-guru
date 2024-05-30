@@ -282,7 +282,7 @@ function processStandardCollection(auth) {
     core.setFailed("GURU_CONVERT_MARKDOWN is only supported for EXTERNAL collections: https://developer.getguru.com/docs/guru-sync-manual-api");
     return;
   } else {
-    const cardFooter = process.env.GURU_CARD_FOOTER?`\n---\n${process.env.GURU_CARD_FOOTER}\n`:'';
+    let cardFooter = process.env.GURU_CARD_FOOTER?`\n---\n${process.env.GURU_CARD_FOOTER}\n`:'';
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     for (let cardFilename in cardConfigs) try {
       const cardContent = fs.readFileSync(cardFilename, 'utf8');
