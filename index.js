@@ -53,40 +53,40 @@ async function apiSendStandardCard(auth, collectionId, title, content) {
 
 function copyCollectionData(targetDir, tmpCardsDir) {
   console.log(`\n--- PROCESSING COLLECTION DATA---`);
-  var allTags=[];
-  var files=fs.readdirSync(tmpCardsDir);
-  for(var i=0;i<files.length;i++){
-      var filename=`${tmpCardsDir}/${files[i]}`;
-      if(filename.endsWith('.yaml')) {
-        var cardYaml = yaml.parse(fs.readFileSync(filename, 'utf8'));
-        for(tag in cardYaml['Tags']) {
-          if(allTags.indexOf(cardYaml['Tags'][tag])<0) {
-            allTags.push(cardYaml['Tags'][tag]);
-          }
+  let allTags = [];
+  let files = fs.readdirSync(tmpCardsDir);
+  for (let file of files) {
+    let filename = `${tmpCardsDir}/${file}`;
+    if (filename.endsWith('.yaml')) {
+      let cardYaml = yaml.parse(fs.readFileSync(filename, 'utf8'));
+      for (let tag of cardYaml['Tags']) {
+        if (!allTags.includes(tag)) {
+          allTags.push(tag);
         }
       }
-  };
+    }
+  }
   if (process.env.GURU_COLLECTION_YAML) {
-    if(allTags.length) {
-      var collectionYaml = yaml.parse(fs.readFileSync(process.env.GURU_COLLECTION_YAML, 'utf8'));
-      if(!(collectionYaml&&collectionYaml['Tags'])) {
+    if (allTags.length) {
+      let collectionYaml = yaml.parse(fs.readFileSync(process.env.GURU_COLLECTION_YAML, 'utf8'));
+      if (!(collectionYaml && collectionYaml['Tags'])) {
         core.setFailed(`No tags are specified in collection.yaml, but tags are present in cards`);
-      }
-      else for(tag in allTags) {
-        if((!collectionYaml['Tags']) || collectionYaml['Tags'].indexOf(allTags[tag])<0) {
-          core.setFailed(`Tag is specified in a card but not present in collection.yaml: ${allTags[tag]}`);
+      } else {
+        for (let tag of allTags) {
+          if (!collectionYaml['Tags'].includes(tag)) {
+            core.setFailed(`Tag is specified in a card but not present in collection.yaml: ${tag}`);
+          }
         }
       }
     }
     console.log(`Copying ${process.env.GURU_COLLECTION_YAML} to ${targetDir}/collection.yaml`);
     fs.copySync(process.env.GURU_COLLECTION_YAML, `${targetDir}/collection.yaml`);
-  }
-  else {
-    collectionYaml = `--- ~\n`;
-    if(allTags.length) {
+  } else {
+    let collectionYaml = `--- ~\n`;
+    if (allTags.length) {
       collectionYaml = `Tags:\n`
-      for(tag in allTags) {
-        collectionYaml += `  - "${allTags[tag]}"\n`
+      for (let tag of allTags) {
+        collectionYaml += `  - "${tag}"\n`
       }
       collectionYaml += `\n`
     }
@@ -111,7 +111,7 @@ function copyCardData(tmpCardsDir) {
         tmpfileBase+=`_`;
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
-      var mdcontent = fs.readFileSync(cardFilename);
+      let mdcontent = fs.readFileSync(cardFilename);
       mdcontent += cardFooter.replace(cardpathRegex,encodeURIComponent(cardFilename));
       if(process.env.GURU_CONVERT_MARKDOWN>0) {
         fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.html`, markdownit.render(mdcontent));
