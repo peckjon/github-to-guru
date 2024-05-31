@@ -285,7 +285,7 @@ function processStandardCollection(auth) {
     let cardFooter = process.env.GURU_CARD_FOOTER?`\n---\n${process.env.GURU_CARD_FOOTER}\n`:'';
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     for (let cardFilename in cardConfigs) try {
-      const cardContent = fs.readFileSync(cardFilename, 'utf8');
+      let cardContent = fs.readFileSync(cardFilename, 'utf8');
       cardContent += cardFooter.replace(cardpathRegex,encodeURIComponent(cardFilename));
       apiSendStandardCard(
         auth,
