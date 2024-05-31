@@ -106,7 +106,7 @@ function copyCardData(tmpCardsDir) {
         core.setFailed(`Cannot find file specified in ${process.env.GURU_CARD_YAML}: ${cardFilename}`);
         return;
       };
-      const tmpfileBase=cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
+      let tmpfileBase=cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
       while(fs.existsSync(`${tmpCardsDir}/${tmpfileBase}.yaml`)) {
         tmpfileBase+=`_`;
       }
@@ -123,7 +123,7 @@ function copyCardData(tmpCardsDir) {
         }
         fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, mdcontent);
       }
-      const cardConfig = cardConfigs[cardFilename];
+      let cardConfig = cardConfigs[cardFilename];
       if (!cardConfig.ExternalId) {
         cardConfig.ExternalId = `${process.env.GITHUB_REPOSITORY}/${cardFilename}`
       }
@@ -154,8 +154,8 @@ function copyCardData(tmpCardsDir) {
     console.log(`Updating relative links to files in GURU_RESOURCES_DIR "${process.env.GURU_RESOURCES_DIR}"`);
     let resources_dir=process.env.GURU_RESOURCES_DIR.replace(/\/+$/, '').replace(/^\/+/, '');
     resources_dir_split=resources_dir.split('/');
-    const htmlLinkMatches = [];
-    const mdLinkMatches = [];
+    let htmlLinkMatches = [];
+    let mdLinkMatches = [];
     while(resources_dir_split.length) {
       resources_dir=resources_dir_split.join('/');
       htmlLinkMatches.push(new RegExp(`(<[^>]* (href|src)=("|'))(\\.\\.\\/)*${resources_dir}(\\/(.*)(\\3))`,'g'));
