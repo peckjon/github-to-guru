@@ -2,6 +2,9 @@
 
 **Deploy content from your GitHub repo into a Guru collection.**
 
+> [!NOTE]
+> This Action takes content _from_ a GitHub repo and places it _into_ a Guru collection. If you're looking to do the reverse (take a Guru collection and export it to GitHub), check out [parkerbxyz/guru-to-github](https://github.com/marketplace/actions/guru-to-github)
+
 For standard collections, this action can add cards based on markdown files in your repository.
 
 For [synchronized collections](https://help.getguru.com/articles/T8eX5e5c/Knowledge-Sync-Overview), it can add and replace cards, boards, board groups, and resources (see [appendix](#appendix-creating-a-synchronized-collection) for details).
