@@ -10,6 +10,8 @@ const markdownit = require('markdown-it')({
   linkify: true
 });
 
+const cardpathRegex = /__CARDPATH__/g;
+
 async function getCollection(auth, collectionId) {
   console.log(`collection: ${collectionId}`)
   return axios.get(`https://api.getguru.com/api/v1/collections/`+collectionId, {auth: auth})
@@ -51,40 +53,40 @@ async function apiSendStandardCard(auth, collectionId, title, content) {
 
 function copyCollectionData(targetDir, tmpCardsDir) {
   console.log(`\n--- PROCESSING COLLECTION DATA---`);
-  var allTags=[];
-  var files=fs.readdirSync(tmpCardsDir);
-  for(var i=0;i<files.length;i++){
-      var filename=`${tmpCardsDir}/${files[i]}`;
-      if(filename.endsWith('.yaml')) {
-        var cardYaml = yaml.parse(fs.readFileSync(filename, 'utf8'));
-        for(tag in cardYaml['Tags']) {
-          if(allTags.indexOf(cardYaml['Tags'][tag])<0) {
-            allTags.push(cardYaml['Tags'][tag]);
-          }
+  let allTags = [];
+  let files = fs.readdirSync(tmpCardsDir);
+  for (let file of files) {
+    let filename = `${tmpCardsDir}/${file}`;
+    if (filename.endsWith('.yaml')) {
+      let cardYaml = yaml.parse(fs.readFileSync(filename, 'utf8'));
+      for (let tag of cardYaml['Tags']) {
+        if (!allTags.includes(tag)) {
+          allTags.push(tag);
         }
       }
-  };
+    }
+  }
   if (process.env.GURU_COLLECTION_YAML) {
-    if(allTags.length) {
-      var collectionYaml = yaml.parse(fs.readFileSync(process.env.GURU_COLLECTION_YAML, 'utf8'));
-      if(!(collectionYaml&&collectionYaml['Tags'])) {
+    if (allTags.length) {
+      let collectionYaml = yaml.parse(fs.readFileSync(process.env.GURU_COLLECTION_YAML, 'utf8'));
+      if (!(collectionYaml && collectionYaml['Tags'])) {
         core.setFailed(`No tags are specified in collection.yaml, but tags are present in cards`);
-      }
-      else for(tag in allTags) {
-        if((!collectionYaml['Tags']) || collectionYaml['Tags'].indexOf(allTags[tag])<0) {
-          core.setFailed(`Tag is specified in a card but not present in collection.yaml: ${allTags[tag]}`);
+      } else {
+        for (let tag of allTags) {
+          if (!collectionYaml['Tags'].includes(tag)) {
+            core.setFailed(`Tag is specified in a card but not present in collection.yaml: ${tag}`);
+          }
         }
       }
     }
     console.log(`Copying ${process.env.GURU_COLLECTION_YAML} to ${targetDir}/collection.yaml`);
     fs.copySync(process.env.GURU_COLLECTION_YAML, `${targetDir}/collection.yaml`);
-  }
-  else {
-    collectionYaml = `--- ~\n`;
-    if(allTags.length) {
+  } else {
+    let collectionYaml = `--- ~\n`;
+    if (allTags.length) {
       collectionYaml = `Tags:\n`
-      for(tag in allTags) {
-        collectionYaml += `  - "${allTags[tag]}"\n`
+      for (let tag of allTags) {
+        collectionYaml += `  - "${tag}"\n`
       }
       collectionYaml += `\n`
     }
@@ -96,7 +98,6 @@ function copyCollectionData(targetDir, tmpCardsDir) {
 function copyCardData(tmpCardsDir) {
   console.log(`\n--- PROCESSING CARD DATA ---`);
   const cardFooter = process.env.GURU_CARD_FOOTER?`\n---\n${process.env.GURU_CARD_FOOTER}\n`:'';
-  const cardpathRegex = /__CARDPATH__/g;
   if(process.env.GURU_CARD_YAML) {
     const cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     console.log(yaml.stringify(cardConfigs))
@@ -105,12 +106,12 @@ function copyCardData(tmpCardsDir) {
         core.setFailed(`Cannot find file specified in ${process.env.GURU_CARD_YAML}: ${cardFilename}`);
         return;
       };
-      const tmpfileBase=cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
+      let tmpfileBase=cardFilename.replace(/\.md$/gi,'').replace(/[^a-zA-Z0-9]/gi, '_');
       while(fs.existsSync(`${tmpCardsDir}/${tmpfileBase}.yaml`)) {
         tmpfileBase+=`_`;
       }
       console.log(`Writing ${cardFilename.replace(/\.md$/gi,'')} to ${tmpCardsDir}/${tmpfileBase}.yaml`);
-      var mdcontent = fs.readFileSync(cardFilename);
+      let mdcontent = fs.readFileSync(cardFilename);
       mdcontent += cardFooter.replace(cardpathRegex,encodeURIComponent(cardFilename));
       if(process.env.GURU_CONVERT_MARKDOWN>0) {
         fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.html`, markdownit.render(mdcontent));
@@ -122,7 +123,7 @@ function copyCardData(tmpCardsDir) {
         }
         fs.writeFileSync(`${tmpCardsDir}/${tmpfileBase}.md`, mdcontent);
       }
-      const cardConfig = cardConfigs[cardFilename];
+      let cardConfig = cardConfigs[cardFilename];
       if (!cardConfig.ExternalId) {
         cardConfig.ExternalId = `${process.env.GITHUB_REPOSITORY}/${cardFilename}`
       }
@@ -153,8 +154,8 @@ function copyCardData(tmpCardsDir) {
     console.log(`Updating relative links to files in GURU_RESOURCES_DIR "${process.env.GURU_RESOURCES_DIR}"`);
     let resources_dir=process.env.GURU_RESOURCES_DIR.replace(/\/+$/, '').replace(/^\/+/, '');
     resources_dir_split=resources_dir.split('/');
-    const htmlLinkMatches = [];
-    const mdLinkMatches = [];
+    let htmlLinkMatches = [];
+    let mdLinkMatches = [];
     while(resources_dir_split.length) {
       resources_dir=resources_dir_split.join('/');
       htmlLinkMatches.push(new RegExp(`(<[^>]* (href|src)=("|'))(\\.\\.\\/)*${resources_dir}(\\/(.*)(\\3))`,'g'));
@@ -281,13 +282,16 @@ function processStandardCollection(auth) {
     core.setFailed("GURU_CONVERT_MARKDOWN is only supported for EXTERNAL collections: https://developer.getguru.com/docs/guru-sync-manual-api");
     return;
   } else {
+    let cardFooter = process.env.GURU_CARD_FOOTER?`\n---\n${process.env.GURU_CARD_FOOTER}\n`:'';
     let cardConfigs = yaml.parse(fs.readFileSync(process.env.GURU_CARD_YAML, 'utf8'));
     for (let cardFilename in cardConfigs) try {
+      let cardContent = fs.readFileSync(cardFilename, 'utf8');
+      cardContent += cardFooter.replace(cardpathRegex,encodeURIComponent(cardFilename));
       apiSendStandardCard(
         auth,
         process.env.GURU_COLLECTION_ID,
         cardConfigs[cardFilename].Title,
-        fs.readFileSync(cardFilename, 'utf8')
+        cardContent
       ).then(response => {
         console.log(`Created card for ${cardFilename}`);
       }).catch(error => {
