@@ -1,0 +1,34 @@
+# .gitignore for Node.js GitHub Actions
+
+# Ignore logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ignore build and distribution directories
+dist/
+build/
+
+# Ignore macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+._*
+
+# Ignore Linux system files
+.*
+!/.gitignore
+
+# Ignore npm debug logs and .npmrc
+npm-debug.log*
+.npmrc
